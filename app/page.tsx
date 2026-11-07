@@ -77,8 +77,8 @@ const nav = [
   { icon: "◉", title: "محصولات و دستور پخت", active: false, href: "/products" },
   { icon: "◈", title: "مواد اولیه", active: false, href: "/materials" },
   { icon: "▤", title: "فروش و سفارش‌ها", active: false, href: "#" },
-  { icon: "◈", title: "هزینه‌ها", active: false, href: "#" },
-  { icon: "♙", title: "پرسنل و حقوق", active: false, href: "#" },
+  { icon: "◈", title: "هزینه‌ها", active: false, href: "/expenses" },
+  { icon: "♙", title: "پرسنل و حقوق", active: false, href: "/staff" },
   { icon: "▥", title: "گزارش‌ها", active: false, href: "#" },
 ] as const;
 
