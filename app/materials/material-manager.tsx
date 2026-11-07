@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Icons from "../components/icons";
+import ShamsiDatePicker from "../components/shamsi-dare-picker";
 import {
   baseUnit,
   baseUnitLabel,
@@ -45,15 +47,6 @@ function jalaliDateLabel(isoDate: string) {
   return persianCalendar.format(new Date(`${isoDate}T12:00:00Z`));
 }
 
-function jalaliParts(date: Date) {
-  const parts = persianCalendar.formatToParts(date);
-  return {
-    year: Number(parts.find((part) => part.type === "year")?.value ?? 0),
-    month: parts.find((part) => part.type === "month")?.value ?? "",
-    day: Number(parts.find((part) => part.type === "day")?.value ?? 0),
-  };
-}
-
 function normalizeCategory(ingredient: Ingredient): IngredientCategory {
   if (
     ingredientCategories.includes(ingredient.category as IngredientCategory)
@@ -92,118 +85,6 @@ function normalizeIngredients(
       priceHistory: history,
     };
   });
-}
-
-function calendarFor(isoDate: string) {
-  const anchor = new Date(`${isoDate}T12:00:00Z`);
-  const selected = jalaliParts(anchor);
-  const start = new Date(
-    Date.UTC(
-      anchor.getUTCFullYear(),
-      anchor.getUTCMonth(),
-      anchor.getUTCDate() - selected.day + 1,
-    ),
-  );
-  const monthLabel = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-    calendar: "persian",
-    timeZone: "UTC",
-    year: "numeric",
-    month: "long",
-  }).format(start);
-  const offset = (start.getUTCDay() + 1) % 7;
-  const days: { date: string; day: number }[] = [];
-  for (let step = 0; step < 42; step += 1) {
-    const date = new Date(start.getTime() + step * 86400000);
-    const parts = jalaliParts(date);
-    if (parts.year !== selected.year || parts.month !== selected.month) break;
-    days.push({ date: date.toISOString().slice(0, 10), day: parts.day });
-  }
-  return { start, monthLabel, offset, days };
-}
-
-function JalaliDatePicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (date: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [viewDate, setViewDate] = useState(value || localIsoDate());
-  const calendar = calendarFor(viewDate);
-  const today = localIsoDate();
-
-  function moveMonth(amount: number) {
-    const shifted = new Date(calendar.start.getTime() + amount * 40 * 86400000);
-    setViewDate(shifted.toISOString().slice(0, 10));
-  }
-
-  return (
-    <div className="jalali-picker">
-      <button
-        type="button"
-        className="date-picker-trigger"
-        onClick={() => {
-          setViewDate(value || today);
-          setOpen((current) => !current);
-        }}
-        aria-expanded={open}
-      >
-        <span>▦</span>
-        {value ? jalaliDateLabel(value) : "انتخاب تاریخ شمسی"}
-        <span className="date-chevron">⌄</span>
-      </button>
-      {open && (
-        <div
-          className="jalali-calendar"
-          role="dialog"
-          aria-label="انتخاب تاریخ شمسی"
-        >
-          <div className="calendar-heading">
-            <button
-              type="button"
-              onClick={() => moveMonth(-1)}
-              aria-label="ماه قبل"
-            >
-              ‹
-            </button>
-            <strong>{calendar.monthLabel}</strong>
-            <button
-              type="button"
-              onClick={() => moveMonth(1)}
-              aria-label="ماه بعد"
-            >
-              ›
-            </button>
-          </div>
-          <div className="calendar-grid calendar-weekdays">
-            {["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day) => (
-              <span key={day}>{day}</span>
-            ))}
-          </div>
-          <div className="calendar-grid">
-            {Array.from({ length: calendar.offset }, (_, index) => (
-              <span className="calendar-empty" key={`blank-${index}`} />
-            ))}
-            {calendar.days.map((day) => (
-              <button
-                type="button"
-                key={day.date}
-                className={`calendar-day${day.date === value ? " selected" : ""}`}
-                disabled={day.date > today}
-                onClick={() => {
-                  onChange(day.date);
-                  setOpen(false);
-                }}
-              >
-                {numberFormat.format(day.day)}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function MaterialManager() {
@@ -478,7 +359,7 @@ export default function MaterialManager() {
       <div className="products-topbar">
         <div>
           <Link href="/products" className="back-link">
-            ← برگشت به محصولات و دستور پخت
+            <Icons name="back" className="inline-icon" /> برگشت به محصولات و دستور پخت
           </Link>
           <p className="eyebrow">بانک مواد اولیه</p>
           <h1>مواد اولیه و قیمت خرید</h1>
@@ -488,7 +369,7 @@ export default function MaterialManager() {
           </p>
         </div>
         <Link className="primary-button" href="#material-form">
-          ＋ ثبت ماده اولیه
+          <Icons name="add" className="inline-icon" /> ثبت ماده اولیه
         </Link>
       </div>
 
@@ -496,7 +377,7 @@ export default function MaterialManager() {
         <div className="products-notice" role="status">
           {notice}
           <button onClick={() => setNotice("")} aria-label="بستن پیام">
-            ×
+            <Icons name="close" />
           </button>
         </div>
       )}
@@ -506,14 +387,14 @@ export default function MaterialManager() {
         aria-label="خلاصه مواد اولیه"
       >
         <article>
-          <span className="summary-icon">◉</span>
+          <Icons name="products" className="summary-icon" />
           <div>
             <small>مواد اولیه ثبت‌شده</small>
             <strong>{numberFormat.format(ingredients.length)}</strong>
           </div>
         </article>
         <article>
-          <span className="summary-icon">▤</span>
+          <Icons name="history" className="summary-icon" />
           <div>
             <small>محصولات متصل به مواد</small>
             <strong>
@@ -600,11 +481,11 @@ export default function MaterialManager() {
           </label>
           <label className="product-field price-date-field">
             <span>تاریخ ثبت قیمت (شمسی)</span>
-            <JalaliDatePicker value={priceDate} onChange={setPriceDate} />
+            <ShamsiDatePicker value={priceDate} onChange={setPriceDate} />
           </label>
           <div className="material-form-actions">
             <button className="primary-button add-ingredient" type="submit">
-              {editingId ? "ذخیره قیمت و تغییرات" : "＋ افزودن ماده"}
+              {editingId ? "ذخیره قیمت و تغییرات" : <><Icons name="add" className="inline-icon" /> افزودن ماده</>}
             </button>
             {editingId && (
               <button
@@ -671,7 +552,7 @@ export default function MaterialManager() {
         </div>
         {visibleIngredients.length === 0 ? (
           <div className="empty-products">
-            <span>◉</span>
+            <Icons name="ingredients" />
             <strong>
               {ingredients.length
                 ? "ماده‌ای در این دسته پیدا نشد"
@@ -756,7 +637,7 @@ export default function MaterialManager() {
                             }
                             aria-label={`حذف ${ingredient.name}`}
                           >
-                            ×
+                            <Icons name="close" />
                           </button>
                         </div>
                       </td>
@@ -792,7 +673,7 @@ export default function MaterialManager() {
               onClick={() => setCategoryPickerOpen(false)}
               aria-label="بستن"
             >
-              ×
+              <Icons name="close" />
             </button>
             <p className="eyebrow">فهرست دسته</p>
             <h2 id="category-dialog-title">{category}</h2>
@@ -824,7 +705,7 @@ export default function MaterialManager() {
                         {formatMoney(unitPrice(ingredient))}
                       </small>
                     </span>
-                    <span>انتخاب ←</span>
+                    <span>انتخاب <Icons name="choose" className="inline-icon" /></span>
                   </button>
                 ))
               ) : (
@@ -837,7 +718,7 @@ export default function MaterialManager() {
               className="primary-button category-add-button"
               onClick={prepareNewItem}
             >
-              ＋ افزودن ماده‌ی جدید به دسته‌ی «{category}»
+              <Icons name="add" className="inline-icon" /> افزودن ماده‌ی جدید به دسته‌ی «{category}»
             </button>
           </section>
         </div>
@@ -861,7 +742,7 @@ export default function MaterialManager() {
               onClick={() => setHistoryId(null)}
               aria-label="بستن"
             >
-              ×
+              <Icons name="close" />
             </button>
             <p className="eyebrow">تغییرات قیمت</p>
             <h2 id="history-dialog-title">
@@ -922,9 +803,18 @@ export default function MaterialManager() {
                                   : "history-change neutral"
                           }
                         >
-                          {change === null
-                            ? "مبنای ثبت"
-                            : `${change > 0 ? "↑ " : change < 0 ? "↓ " : ""}${numberFormat.format(Math.abs(change))}٪`}
+                          {change === null ? (
+                            "مبنای ثبت"
+                          ) : (
+                            <>
+                              {change > 0 ? (
+                                <Icons name="up-arrow" className="inline-icon" />
+                              ) : change < 0 ? (
+                                <Icons className="shared-down-arrow history-down-arrow" />
+                              ) : null}
+                              {numberFormat.format(Math.abs(change))}٪
+                            </>
+                          )}
                         </span>
                       </article>
                     );
@@ -949,7 +839,7 @@ export default function MaterialManager() {
                   startEditing(historyIngredient);
                 }}
               >
-                ＋ ثبت قیمت جدید
+                <Icons name="add" className="inline-icon" /> ثبت قیمت جدید
               </button>
             </div>
           </section>

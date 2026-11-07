@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Icons from "../components/icons";
+import ShamsiDatePicker from "../components/shamsi-dare-picker";
 import { formatMoney, makeId, numberFormat } from "../lib/costing";
 
 const STAFF_KEY = "hesabchi.staff.v1";
@@ -234,7 +236,7 @@ export default function StaffManager() {
       <header className="products-topbar">
         <div>
           <Link href="/" className="back-link">
-            ← برگشت به داشبورد
+            <Icons name="back" className="inline-icon" /> برگشت به داشبورد
           </Link>
           <p className="eyebrow">مدیریت تیم کسب‌وکار</p>
           <h1>پرسنل و حقوق</h1>
@@ -243,7 +245,7 @@ export default function StaffManager() {
           </p>
         </div>
         <a className="primary-button" href="#staff-form">
-          ＋ افزودن پرسنل
+          <Icons name="add" className="inline-icon" /> افزودن پرسنل
         </a>
       </header>
 
@@ -251,14 +253,14 @@ export default function StaffManager() {
         <div className="products-notice" role="status">
           <span>{notice}</span>
           <button onClick={() => setNotice("")} aria-label="بستن">
-            ×
+            <Icons name="close" />
           </button>
         </div>
       )}
 
       <section className="staff-stats" aria-label="خلاصه حقوق و پرسنل">
         <article className="staff-stat">
-          <span className="staff-stat-icon">♙</span>
+          <Icons name="staff" className="staff-stat-icon" />
           <div>
             <small>پرسنل فعال</small>
             <strong>{numberFormat.format(activeStaff.length)} نفر</strong>
@@ -266,7 +268,7 @@ export default function StaffManager() {
           </div>
         </article>
         <article className="staff-stat">
-          <span className="staff-stat-icon payroll">▤</span>
+          <Icons name="payroll" className="staff-stat-icon payroll" />
           <div>
             <small>حقوق برآوردی ماهانه</small>
             <strong>{formatMoney(estimated)}</strong>
@@ -274,7 +276,7 @@ export default function StaffManager() {
           </div>
         </article>
         <article className="staff-stat">
-          <span className="staff-stat-icon paid">✓</span>
+          <Icons name="paid" className="staff-stat-icon paid" />
           <div>
             <small>پرداخت‌شده این ماه</small>
             <strong>{formatMoney(paid)}</strong>
@@ -322,11 +324,10 @@ export default function StaffManager() {
           </label>
           <label className="product-field">
             <span>تاریخ شروع همکاری</span>
-            <input
-              required
-              type="date"
+            <ShamsiDatePicker
               value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
+              onChange={setStartDate}
+              placeholder="انتخاب تاریخ شروع شمسی"
             />
           </label>
           <button className="primary-button staff-submit" type="submit">
@@ -372,11 +373,10 @@ export default function StaffManager() {
             </label>
             <label className="product-field">
               <span>تاریخ پرداخت / ثبت</span>
-              <input
-                required
-                type="date"
-                value={payDate}
-                onChange={(event) => setPayDate(event.target.value)}
+              <ShamsiDatePicker
+                value={startDate}
+                onChange={setStartDate}
+                placeholder="انتخاب تاریخ پرداخت شمسی"
               />
             </label>
             <label className="product-field">

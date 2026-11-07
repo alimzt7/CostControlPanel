@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Icons from "../components/icons";
 import { formatMoney, makeId, numberFormat } from "../lib/costing";
 
 const EXPENSES_KEY = "hesabchi.expenses.v1";
@@ -181,7 +182,7 @@ export default function ExpenseManager() {
       <header className="products-topbar">
         <div>
           <Link href="/" className="back-link">
-            ← برگشت به داشبورد
+            <Icons name="back" className="inline-icon" /> برگشت به داشبورد
           </Link>
           <p className="eyebrow">مدیریت مالی کسب‌وکار</p>
           <h1>هزینه‌ها</h1>
@@ -190,7 +191,7 @@ export default function ExpenseManager() {
           </p>
         </div>
         <a className="primary-button" href="#expense-form">
-          ＋ ثبت هزینه
+          <Icons name="add" className="inline-icon" /> ثبت هزینه
         </a>
       </header>
 
@@ -198,7 +199,7 @@ export default function ExpenseManager() {
         <div className="products-notice" role="status">
           <span>{notice}</span>
           <button onClick={() => setNotice("")} aria-label="بستن">
-            ×
+            <Icons name="close" />
           </button>
         </div>
       )}
@@ -208,7 +209,7 @@ export default function ExpenseManager() {
         aria-label="خلاصه هزینه‌ها در ماه جاری"
       >
         <article className="expense-stat">
-          <span className="expense-stat-icon">↗</span>
+          <Icons name="revenue" className="expense-stat-icon" />
           <div>
             <small>جمع هزینه‌های این ماه</small>
             <strong>{formatMoney(monthTotal)}</strong>
@@ -225,7 +226,7 @@ export default function ExpenseManager() {
           </div>
         </article>
         <article className="expense-stat">
-          <span className="expense-stat-icon payroll">♙</span>
+          <Icons name="staff" className="expense-stat-icon payroll" />
           <div>
             <small>حقوق و دستمزد</small>
             <strong>{formatMoney(peopleTotal)}</strong>
@@ -400,7 +401,7 @@ export default function ExpenseManager() {
                         }
                         aria-label={`حذف ${expense.title}`}
                       >
-                        ×
+                        <Icons name="close" />
                       </button>
                     </td>
                   </tr>
@@ -410,7 +411,7 @@ export default function ExpenseManager() {
           </div>
         ) : (
           <div className="expense-empty">
-            <span>▤</span>
+            <Icons name="orders" />
             <strong>
               {expenses.length
                 ? "هزینه‌ای با این جست‌وجو پیدا نشد"

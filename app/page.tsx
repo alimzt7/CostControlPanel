@@ -1,9 +1,11 @@
+import Icons, { type IconName } from "./components/icons";
+
 const stats = [
   {
     label: "فروش این ماه",
     value: "۱۲۸,۴۵۰",
     unit: "هزار تومان",
-    icon: "↗",
+    icon: "revenue",
     color: "#e8f5ee",
     change: "۱۲٪ رشد",
     note: "نسبت به ماه قبل",
@@ -12,7 +14,7 @@ const stats = [
     label: "سود خالص",
     value: "۳۶,۸۲۰",
     unit: "هزار تومان",
-    icon: "◈",
+    icon: "profit",
     color: "#f0edff",
     change: "۸.۴٪ رشد",
     note: "نسبت به ماه قبل",
@@ -21,7 +23,7 @@ const stats = [
     label: "هزینه‌ها",
     value: "۹۱,۶۳۰",
     unit: "هزار تومان",
-    icon: "◉",
+    icon: "cost",
     color: "#fff1e7",
     change: "۵٪ کاهش",
     note: "نسبت به ماه قبل",
@@ -30,17 +32,17 @@ const stats = [
     label: "سفارش‌ها",
     value: "۱,۲۸۴",
     unit: "سفارش",
-    icon: "▤",
+    icon: "orders",
     color: "#eaf2ff",
     change: "۱۸٪ رشد",
     note: "نسبت به ماه قبل",
   },
-];
+ ] as const;
 
 const products = [
   {
     name: "ساندویچ مرغ گریل",
-    icon: "🥪",
+    icon: "sandwich",
     cost: "۱۸۵,۰۰۰",
     price: "۳۲۰,۰۰۰",
     profit: "۴۲٪",
@@ -48,7 +50,7 @@ const products = [
   },
   {
     name: "برگر مخصوص",
-    icon: "🍔",
+    icon: "burger",
     cost: "۲۴۰,۰۰۰",
     price: "۴۲۰,۰۰۰",
     profit: "۴۳٪",
@@ -56,7 +58,7 @@ const products = [
   },
   {
     name: "سالاد سزار",
-    icon: "🥗",
+    icon: "salad",
     cost: "۱۲۸,۰۰۰",
     price: "۲۶۰,۰۰۰",
     profit: "۵۱٪",
@@ -64,22 +66,22 @@ const products = [
   },
   {
     name: "پاستا آلفردو",
-    icon: "🍝",
+    icon: "pasta",
     cost: "۱۶۲,۰۰۰",
     price: "۳۱۰,۰۰۰",
     profit: "۴۸٪",
     tag: "سود بالا",
   },
-];
+ ] as const;
 
 const nav = [
-  { icon: "▦", title: "داشبورد", active: true, href: "/" },
-  { icon: "◉", title: "محصولات و دستور پخت", active: false, href: "/products" },
-  { icon: "◈", title: "مواد اولیه", active: false, href: "/materials" },
-  { icon: "▤", title: "فروش و سفارش‌ها", active: false, href: "#" },
-  { icon: "◈", title: "هزینه‌ها", active: false, href: "/expenses" },
-  { icon: "♙", title: "پرسنل و حقوق", active: false, href: "/staff" },
-  { icon: "▥", title: "گزارش‌ها", active: false, href: "#" },
+  { icon: "dashboard", title: "داشبورد", active: true, href: "/" },
+  { icon: "products", title: "محصولات و دستور پخت", active: false, href: "/products" },
+  { icon: "ingredients", title: "مواد اولیه", active: false, href: "/materials" },
+  { icon: "orders", title: "فروش و سفارش‌ها", active: false, href: "#" },
+  { icon: "expenses", title: "هزینه‌ها", active: false, href: "/expenses" },
+  { icon: "staff", title: "پرسنل و حقوق", active: false, href: "/staff" },
+  { icon: "reports", title: "گزارش‌ها", active: false, href: "#" },
 ] as const;
 
 function TrendChart() {
@@ -168,7 +170,7 @@ export default function Home() {
               href={href}
               key={title}
             >
-              <span className="nav-icon">{icon}</span>
+              <Icons name={icon} className="nav-icon" />
               <span>{title}</span>
             </a>
           ))}
@@ -176,11 +178,11 @@ export default function Home() {
         <div className="sidebar-bottom">
           <div className="nav-label">تنظیمات</div>
           <a className="nav-link" href="#">
-            <span className="nav-icon">⚙</span>
+            <Icons name="settings" className="nav-icon" />
             <span>تنظیمات کسب‌وکار</span>
           </a>
           <a className="nav-link" href="#">
-            <span className="nav-icon">؟</span>
+            <Icons name="help" className="nav-icon" />
             <span>راهنما و پشتیبانی</span>
           </a>
           <div className="profile">
@@ -189,29 +191,29 @@ export default function Home() {
               <div className="profile-name">محمد نادری</div>
               <div className="profile-sub">کافه رستوران نارنج</div>
             </div>
-            <span style={{ marginRight: "auto", color: "#9aa49e" }}>⌄</span>
+            <Icons className="shared-down-arrow profile-chevron" />
           </div>
         </div>
       </aside>
       <main className="main-area min-w-0 flex-1">
         <header className="topbar flex items-center justify-between">
           <div className="welcome">
-            <h1>سلام محمد، خوش اومدی 👋</h1>
+          <h1>سلام محمد، خوش اومدی <Icons name="welcome" className="welcome-icon" /></h1>
             <p>این گزارش عملکرد کسب‌و‌کارت در آبان ماه ۱۴۰۵ هست.</p>
           </div>
           <div className="top-actions">
             <button className="period-select">
-              ▦ &nbsp; آبان ۱۴۰۵ &nbsp;⌄
+              <Icons name="calendar" /> آبان ۱۴۰۵ <Icons className="shared-down-arrow" />
             </button>
             <button className="icon-button" aria-label="اعلان‌ها">
-              ♧<i className="notify-dot" />
+              <Icons name="notifications" /><i className="notify-dot" />
             </button>
           </div>
         </header>
         <section aria-label="خلاصه عملکرد">
           <div className="section-title">
             <h2>خلاصه عملکرد</h2>
-            <a href="#">مشاهده گزارش کامل ←</a>
+            <a href="#">مشاهده گزارش کامل <Icons name="back" className="inline-icon" /></a>
           </div>
           <div className="stats-grid">
             {stats.map((item) => (
@@ -222,14 +224,14 @@ export default function Home() {
                     className="stat-icon"
                     style={{ background: item.color }}
                   >
-                    {item.icon}
+                    <Icons name={item.icon} />
                   </span>
                 </div>
                 <div className="stat-value">
                   {item.value} <small>{item.unit}</small>
                 </div>
                 <div className="stat-foot">
-                  ↗ {item.change} <span>{item.note}</span>
+                  <Icons name="increase" className="trend-icon" /> {item.change} <span>{item.note}</span>
                 </div>
               </article>
             ))}
@@ -238,7 +240,7 @@ export default function Home() {
         <section>
           <div className="section-title">
             <h2>گزارش فروش و هزینه</h2>
-            <a href="#">جزئیات بیشتر ←</a>
+            <a href="#">جزئیات بیشتر <Icons name="back" className="inline-icon" /></a>
           </div>
           <div className="content-grid">
             <article className="panel">
@@ -264,12 +266,12 @@ export default function Home() {
                   <h3>ترکیب هزینه‌ها</h3>
                   <p>سهم هر بخش از هزینه‌های ماهانه</p>
                 </div>
-                <span style={{ color: "#95a098", fontSize: 11 }}>•••</span>
+                <Icons name="more" className="more-icon" />
               </div>
               <div className="cost-list">
                 {[
                   [
-                    "▧",
+                    "supply",
                     "مواد اولیه",
                     "۴۲٪ از کل هزینه",
                     "۳۸,۴۸۰",
@@ -278,7 +280,7 @@ export default function Home() {
                     "#17845b",
                   ],
                   [
-                    "♙",
+                    "staff",
                     "حقوق پرسنل",
                     "۲۸٪ از کل هزینه",
                     "۲۵,۶۵۰",
@@ -287,7 +289,7 @@ export default function Home() {
                     "#e99b5c",
                   ],
                   [
-                    "⌂",
+                    "rent",
                     "اجاره و قبوض",
                     "۱۸٪ از کل هزینه",
                     "۱۶,۴۹۰",
@@ -296,7 +298,7 @@ export default function Home() {
                     "#8f7ee7",
                   ],
                   [
-                    "◈",
+                    "expenses",
                     "سایر هزینه‌ها",
                     "۱۲٪ از کل هزینه",
                     "۱۱,۰۱۰",
@@ -310,7 +312,7 @@ export default function Home() {
                       className="cost-symbol"
                       style={{ background: bg, color }}
                     >
-                      {icon}
+                      <Icons name={icon as IconName} />
                     </span>
                     <div>
                       <div className="cost-name">{name}</div>
@@ -336,7 +338,7 @@ export default function Home() {
         <section>
           <div className="section-title">
             <h2>محصولات پرفروش</h2>
-            <a href="/products">مدیریت محصولات ←</a>
+            <a href="/products">مدیریت محصولات <Icons name="back" className="inline-icon" /></a>
           </div>
           <article className="panel table-wrap">
             <table className="products-table">
@@ -354,7 +356,7 @@ export default function Home() {
                   <tr key={product.name}>
                     <td>
                       <div className="product-cell">
-                        <span className="product-emoji">{product.icon}</span>
+                        <Icons name={product.icon} className="product-emoji" />
                         {product.name}
                       </div>
                     </td>
@@ -380,7 +382,7 @@ export default function Home() {
               href="/products#new-product"
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <span className="quick-icon">＋</span>
+              <span className="quick-icon"><Icons name="add" /></span>
               <div>
                 <strong>افزودن محصول جدید</strong>
                 <span>محاسبه قیمت تمام‌شده محصول</span>
@@ -395,7 +397,7 @@ export default function Home() {
                 className="quick-icon"
                 style={{ background: "#fff1e7", color: "#d78548" }}
               >
-                ◉
+                <Icons name="ingredients" />
               </span>
               <div>
                 <strong>مدیریت مواد اولیه</strong>
@@ -411,7 +413,7 @@ export default function Home() {
                 className="quick-icon"
                 style={{ background: "#f0edff", color: "#8170d6" }}
               >
-                ▥
+                <Icons name="reports" />
               </span>
               <div>
                 <strong>گزارش سود و زیان</strong>

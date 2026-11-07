@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Icons from "../components/icons";
 import {
   baseUnit,
   baseUnitLabel,
@@ -136,7 +137,7 @@ export default function ProductManager() {
       <div className="products-topbar">
         <div>
           <Link href="/" className="back-link">
-            ← برگشت به داشبورد
+            <Icons name="back" className="inline-icon" /> برگشت به داشبورد
           </Link>
           <p className="eyebrow">مدیریت منو و دستور پخت</p>
           <h1>محصولات و قیمت تمام‌شده</h1>
@@ -145,7 +146,7 @@ export default function ProductManager() {
           </p>
         </div>
         <Link className="primary-button" href="#new-product">
-          ＋ محصول جدید
+          <Icons name="add" className="inline-icon" /> محصول جدید
         </Link>
       </div>
 
@@ -153,28 +154,28 @@ export default function ProductManager() {
         <div className="products-notice" role="status">
           {notice}
           <button onClick={() => setNotice("")} aria-label="بستن پیام">
-            ×
+            <Icons name="close" />
           </button>
         </div>
       )}
 
       <section className="product-summary" aria-label="خلاصه محصولات">
         <article>
-          <span className="summary-icon">▤</span>
+          <Icons name="history" className="summary-icon" />
           <div>
             <small>محصولات ثبت‌شده</small>
             <strong>{numberFormat.format(products.length)}</strong>
           </div>
         </article>
         <article>
-          <span className="summary-icon">◈</span>
+          <Icons name="profit" className="summary-icon" />
           <div>
             <small>میانگین حاشیه سود مواد اولیه</small>
             <strong>{numberFormat.format(averageMargin * 100) + "٪"}</strong>
           </div>
         </article>
         <article>
-          <span className="summary-icon">◉</span>
+          <Icons name="products" className="summary-icon" />
           <div>
             <small>مواد اولیه فعال</small>
             <strong>{numberFormat.format(ingredients.length)}</strong>
@@ -189,7 +190,7 @@ export default function ProductManager() {
               <h2>تعریف محصول و دستور پخت</h2>
               <p>مقدار هر ماده برای تهیه‌ی یک پرس را وارد کن؛ قیمت روز مواد از بخش مواد اولیه محاسبه می‌شود.</p>
             </div>
-            <div className="panel-heading-actions"><Link className="text-button" href="/materials">مدیریت مواد اولیه ←</Link><span className="panel-step">۱</span></div>
+            <div className="panel-heading-actions"><Link className="text-button" href="/materials">مدیریت مواد اولیه <Icons name="back" className="inline-icon" /></Link><span className="panel-step">۱</span></div>
           </div>
           <form onSubmit={submitProduct}>
             <label className="product-field">
@@ -227,7 +228,7 @@ export default function ProductManager() {
                 }
                 disabled={!ingredients.length}
               >
-                ＋ افزودن ماده
+                <Icons name="add" className="inline-icon" /> افزودن ماده
               </button>
             </div>
             {ingredients.length === 0 ? (
@@ -286,7 +287,7 @@ export default function ProductManager() {
                         }
                         aria-label="حذف ماده"
                       >
-                        ×
+                        <Icons name="close" />
                       </button>
                     </div>
                   );
@@ -342,7 +343,7 @@ export default function ProductManager() {
           </div>
           {products.length === 0 ? (
             <div className="empty-products">
-              <span>◈</span>
+              <Icons name="ingredients" />
               <strong>هنوز محصولی ثبت نکردی</strong>
               <p>از فرم کنار صفحه اولین محصولت را بساز.</p>
             </div>
@@ -356,7 +357,7 @@ export default function ProductManager() {
                 return (
                   <article className="managed-product" key={product.id}>
                     <div className="managed-product-title">
-                      <span className="product-emoji">🥪</span>
+                      <Icons name="sandwich" className="product-emoji" />
                       <div>
                         <h3>{product.name}</h3>
                         <p>{product.recipe.length} قلم مواد اولیه</p>
@@ -366,7 +367,7 @@ export default function ProductManager() {
                         onClick={() => removeProduct(product.id)}
                         aria-label={`حذف ${product.name}`}
                       >
-                        ×
+                        <Icons name="close" />
                       </button>
                     </div>
                     <div className="managed-product-stats">
