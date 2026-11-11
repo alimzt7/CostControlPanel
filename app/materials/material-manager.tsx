@@ -359,7 +359,8 @@ export default function MaterialManager() {
       <div className="products-topbar">
         <div>
           <Link href="/products" className="back-link">
-            <Icons name="back" className="inline-icon" /> برگشت به محصولات و دستور پخت
+            <Icons name="back" className="inline-icon" /> برگشت به محصولات و
+            دستور پخت
           </Link>
           <p className="eyebrow">بانک مواد اولیه</p>
           <h1>مواد اولیه و قیمت خرید</h1>
@@ -485,7 +486,13 @@ export default function MaterialManager() {
           </label>
           <div className="material-form-actions">
             <button className="primary-button add-ingredient" type="submit">
-              {editingId ? "ذخیره قیمت و تغییرات" : <><Icons name="add" className="inline-icon" /> افزودن ماده</>}
+              {editingId ? (
+                "ذخیره قیمت و تغییرات"
+              ) : (
+                <>
+                  <Icons name="add" className="inline-icon" /> افزودن ماده
+                </>
+              )}
             </button>
             {editingId && (
               <button
@@ -705,7 +712,9 @@ export default function MaterialManager() {
                         {formatMoney(unitPrice(ingredient))}
                       </small>
                     </span>
-                    <span>انتخاب <Icons name="choose" className="inline-icon" /></span>
+                    <span>
+                      انتخاب <Icons name="choose" className="inline-icon" />
+                    </span>
                   </button>
                 ))
               ) : (
@@ -718,7 +727,8 @@ export default function MaterialManager() {
               className="primary-button category-add-button"
               onClick={prepareNewItem}
             >
-              <Icons name="add" className="inline-icon" /> افزودن ماده‌ی جدید به دسته‌ی «{category}»
+              <Icons name="add" className="inline-icon" /> افزودن ماده‌ی جدید به
+              دسته‌ی «{category}»
             </button>
           </section>
         </div>
@@ -808,7 +818,10 @@ export default function MaterialManager() {
                           ) : (
                             <>
                               {change > 0 ? (
-                                <Icons name="up-arrow" className="inline-icon" />
+                                <Icons
+                                  name="up-arrow"
+                                  className="inline-icon"
+                                />
                               ) : change < 0 ? (
                                 <Icons className="shared-down-arrow history-down-arrow" />
                               ) : null}

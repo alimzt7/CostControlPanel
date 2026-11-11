@@ -37,7 +37,7 @@ const stats = [
     change: "۱۸٪ رشد",
     note: "نسبت به ماه قبل",
   },
- ] as const;
+] as const;
 
 const products = [
   {
@@ -72,12 +72,22 @@ const products = [
     profit: "۴۸٪",
     tag: "سود بالا",
   },
- ] as const;
+] as const;
 
 const nav = [
   { icon: "dashboard", title: "داشبورد", active: true, href: "/" },
-  { icon: "products", title: "محصولات و دستور پخت", active: false, href: "/products" },
-  { icon: "ingredients", title: "مواد اولیه", active: false, href: "/materials" },
+  {
+    icon: "products",
+    title: "محصولات و دستور پخت",
+    active: false,
+    href: "/products",
+  },
+  {
+    icon: "ingredients",
+    title: "مواد اولیه",
+    active: false,
+    href: "/materials",
+  },
   { icon: "orders", title: "فروش و سفارش‌ها", active: false, href: "#" },
   { icon: "expenses", title: "هزینه‌ها", active: false, href: "/expenses" },
   { icon: "staff", title: "پرسنل و حقوق", active: false, href: "/staff" },
@@ -198,22 +208,29 @@ export default function Home() {
       <main className="main-area min-w-0 flex-1">
         <header className="topbar flex items-center justify-between">
           <div className="welcome">
-          <h1>سلام محمد، خوش اومدی <Icons name="welcome" className="welcome-icon" /></h1>
+            <h1>
+              سلام محمد، خوش اومدی{" "}
+              <Icons name="welcome" className="welcome-icon" />
+            </h1>
             <p>این گزارش عملکرد کسب‌و‌کارت در آبان ماه ۱۴۰۵ هست.</p>
           </div>
           <div className="top-actions">
             <button className="period-select">
-              <Icons name="calendar" /> آبان ۱۴۰۵ <Icons className="shared-down-arrow" />
+              <Icons name="calendar" /> آبان ۱۴۰۵{" "}
+              <Icons className="shared-down-arrow" />
             </button>
             <button className="icon-button" aria-label="اعلان‌ها">
-              <Icons name="notifications" /><i className="notify-dot" />
+              <Icons name="notifications" />
+              <i className="notify-dot" />
             </button>
           </div>
         </header>
         <section aria-label="خلاصه عملکرد">
           <div className="section-title">
             <h2>خلاصه عملکرد</h2>
-            <a href="#">مشاهده گزارش کامل <Icons name="back" className="inline-icon" /></a>
+            <a href="#">
+              مشاهده گزارش کامل <Icons name="back" className="inline-icon" />
+            </a>
           </div>
           <div className="stats-grid">
             {stats.map((item) => (
@@ -231,7 +248,8 @@ export default function Home() {
                   {item.value} <small>{item.unit}</small>
                 </div>
                 <div className="stat-foot">
-                  <Icons name="increase" className="trend-icon" /> {item.change} <span>{item.note}</span>
+                  <Icons name="increase" className="trend-icon" /> {item.change}{" "}
+                  <span>{item.note}</span>
                 </div>
               </article>
             ))}
@@ -240,7 +258,9 @@ export default function Home() {
         <section>
           <div className="section-title">
             <h2>گزارش فروش و هزینه</h2>
-            <a href="#">جزئیات بیشتر <Icons name="back" className="inline-icon" /></a>
+            <a href="#">
+              جزئیات بیشتر <Icons name="back" className="inline-icon" />
+            </a>
           </div>
           <div className="content-grid">
             <article className="panel">
@@ -338,7 +358,9 @@ export default function Home() {
         <section>
           <div className="section-title">
             <h2>محصولات پرفروش</h2>
-            <a href="/products">مدیریت محصولات <Icons name="back" className="inline-icon" /></a>
+            <a href="/products">
+              مدیریت محصولات <Icons name="back" className="inline-icon" />
+            </a>
           </div>
           <article className="panel table-wrap">
             <table className="products-table">
@@ -382,7 +404,9 @@ export default function Home() {
               href="/products#new-product"
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <span className="quick-icon"><Icons name="add" /></span>
+              <span className="quick-icon">
+                <Icons name="add" />
+              </span>
               <div>
                 <strong>افزودن محصول جدید</strong>
                 <span>محاسبه قیمت تمام‌شده محصول</span>

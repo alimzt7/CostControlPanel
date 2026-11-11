@@ -36,8 +36,12 @@ export default function ProductManager() {
       const savedIngredients = localStorage.getItem(INGREDIENTS_KEY);
       const savedProducts = localStorage.getItem(PRODUCTS_KEY);
       const migrated = migrateDemoTomato(
-        savedIngredients ? JSON.parse(savedIngredients) as Ingredient[] : initialIngredients,
-        savedProducts ? JSON.parse(savedProducts) as Product[] : initialProducts,
+        savedIngredients
+          ? (JSON.parse(savedIngredients) as Ingredient[])
+          : initialIngredients,
+        savedProducts
+          ? (JSON.parse(savedProducts) as Product[])
+          : initialProducts,
       );
       setIngredients(migrated.ingredients);
       setProducts(migrated.products);
@@ -72,7 +76,11 @@ export default function ProductManager() {
       if (saved) setIngredients(JSON.parse(saved) as Ingredient[]);
     }
     window.addEventListener("hesabchi:ingredients-updated", refreshIngredients);
-    return () => window.removeEventListener("hesabchi:ingredients-updated", refreshIngredients);
+    return () =>
+      window.removeEventListener(
+        "hesabchi:ingredients-updated",
+        refreshIngredients,
+      );
   }, []);
 
   const ingredientById = useMemo(
@@ -188,9 +196,17 @@ export default function ProductManager() {
           <div className="panel-heading product-panel-heading">
             <div>
               <h2>تعریف محصول و دستور پخت</h2>
-              <p>مقدار هر ماده برای تهیه‌ی یک پرس را وارد کن؛ قیمت روز مواد از بخش مواد اولیه محاسبه می‌شود.</p>
+              <p>
+                مقدار هر ماده برای تهیه‌ی یک پرس را وارد کن؛ قیمت روز مواد از
+                بخش مواد اولیه محاسبه می‌شود.
+              </p>
             </div>
-            <div className="panel-heading-actions"><Link className="text-button" href="/materials">مدیریت مواد اولیه <Icons name="back" className="inline-icon" /></Link><span className="panel-step">۱</span></div>
+            <div className="panel-heading-actions">
+              <Link className="text-button" href="/materials">
+                مدیریت مواد اولیه <Icons name="back" className="inline-icon" />
+              </Link>
+              <span className="panel-step">۱</span>
+            </div>
           </div>
           <form onSubmit={submitProduct}>
             <label className="product-field">
@@ -232,7 +248,10 @@ export default function ProductManager() {
               </button>
             </div>
             {ingredients.length === 0 ? (
-              <p className="empty-inline">اول از <Link href="/materials">بخش مواد اولیه</Link>، یک ماده ثبت کن.</p>
+              <p className="empty-inline">
+                اول از <Link href="/materials">بخش مواد اولیه</Link>، یک ماده
+                ثبت کن.
+              </p>
             ) : (
               <div className="recipe-lines">
                 {recipe.map((line, index) => {

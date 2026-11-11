@@ -49,12 +49,54 @@ export const purchaseUnits: { value: PurchaseUnit; label: string }[] = [
 ];
 
 export const initialIngredients: Ingredient[] = [
-  { id: "chicken", name: "فیله مرغ", category: "گوشت و پروتئین", purchaseQuantity: 1, purchaseUnit: "kg", purchasePrice: 520000 },
-  { id: "bread", name: "نان ساندویچی", category: "نان و غلات", purchaseQuantity: 10, purchaseUnit: "count", purchasePrice: 240000 },
-  { id: "cheese", name: "پنیر ورقه‌ای", category: "لبنیات و پنیر", purchaseQuantity: 1, purchaseUnit: "kg", purchasePrice: 420000 },
-  { id: "sauce", name: "سس مخصوص", category: "سس و چاشنی", purchaseQuantity: 1, purchaseUnit: "kg", purchasePrice: 180000 },
-  { id: "lettuce", name: "کاهو", category: "سبزیجات و صیفی‌جات", purchaseQuantity: 1, purchaseUnit: "kg", purchasePrice: 120000 },
-  { id: "tomato", name: "گوجه‌فرنگی", category: "سبزیجات و صیفی‌جات", purchaseQuantity: 1, purchaseUnit: "kg", purchasePrice: 50000 },
+  {
+    id: "chicken",
+    name: "فیله مرغ",
+    category: "گوشت و پروتئین",
+    purchaseQuantity: 1,
+    purchaseUnit: "kg",
+    purchasePrice: 520000,
+  },
+  {
+    id: "bread",
+    name: "نان ساندویچی",
+    category: "نان و غلات",
+    purchaseQuantity: 10,
+    purchaseUnit: "count",
+    purchasePrice: 240000,
+  },
+  {
+    id: "cheese",
+    name: "پنیر ورقه‌ای",
+    category: "لبنیات و پنیر",
+    purchaseQuantity: 1,
+    purchaseUnit: "kg",
+    purchasePrice: 420000,
+  },
+  {
+    id: "sauce",
+    name: "سس مخصوص",
+    category: "سس و چاشنی",
+    purchaseQuantity: 1,
+    purchaseUnit: "kg",
+    purchasePrice: 180000,
+  },
+  {
+    id: "lettuce",
+    name: "کاهو",
+    category: "سبزیجات و صیفی‌جات",
+    purchaseQuantity: 1,
+    purchaseUnit: "kg",
+    purchasePrice: 120000,
+  },
+  {
+    id: "tomato",
+    name: "گوجه‌فرنگی",
+    category: "سبزیجات و صیفی‌جات",
+    purchaseQuantity: 1,
+    purchaseUnit: "kg",
+    purchasePrice: 50000,
+  },
 ];
 
 export const initialProducts: Product[] = [
@@ -72,9 +114,13 @@ export const initialProducts: Product[] = [
   },
 ];
 
-export function migrateDemoTomato(ingredients: Ingredient[], products: Product[]) {
+export function migrateDemoTomato(
+  ingredients: Ingredient[],
+  products: Product[],
+) {
   const tomato = ingredients.find(
-    (ingredient) => ingredient.id === "tomato" || ingredient.name.includes("گوجه"),
+    (ingredient) =>
+      ingredient.id === "tomato" || ingredient.name.includes("گوجه"),
   );
   if (tomato) return { ingredients, products };
 
@@ -84,13 +130,21 @@ export function migrateDemoTomato(ingredients: Ingredient[], products: Product[]
     ) && products.some((product) => product.id === "grilled-chicken-sandwich");
   if (!isExistingDemo) return { ingredients, products };
 
-  const seedTomato = initialIngredients.find((ingredient) => ingredient.id === "tomato");
+  const seedTomato = initialIngredients.find(
+    (ingredient) => ingredient.id === "tomato",
+  );
   if (!seedTomato) return { ingredients, products };
   return {
     ingredients: [...ingredients, seedTomato],
     products: products.map((product) =>
       product.id === "grilled-chicken-sandwich"
-        ? { ...product, recipe: [...product.recipe, { ingredientId: seedTomato.id, quantity: 100 }] }
+        ? {
+            ...product,
+            recipe: [
+              ...product.recipe,
+              { ingredientId: seedTomato.id, quantity: 100 },
+            ],
+          }
         : product,
     ),
   };
@@ -117,7 +171,8 @@ export const unitPrice = (ingredient: Ingredient) =>
   toBaseQuantity(ingredient.purchaseQuantity, ingredient.purchaseUnit);
 
 export const historicalUnitPrice = (entry: IngredientPrice) =>
-  entry.purchasePrice / toBaseQuantity(entry.purchaseQuantity, entry.purchaseUnit);
+  entry.purchasePrice /
+  toBaseQuantity(entry.purchaseQuantity, entry.purchaseUnit);
 
 export function recipeCost(recipe: RecipeLine[], ingredients: Ingredient[]) {
   const byId = new Map<string, Ingredient>(
