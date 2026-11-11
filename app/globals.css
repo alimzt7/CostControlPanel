@@ -798,7 +798,7 @@ a:focus-visible {
 }
 .product-summary {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 13px;
   margin-bottom: 16px;
 }
@@ -1883,7 +1883,6 @@ body,
 .ingredient-form select,
 .material-form input,
 .material-form select,
-.material-search,
 .modal-search input {
   background: #fbfcfb;
   border-color: #dce5de;
@@ -3117,7 +3116,6 @@ body,
 .ingredient-form select,
 .material-form input,
 .material-form select,
-.material-search,
 .modal-search input,
 .staff-search input,
 .expense-form .product-field input,

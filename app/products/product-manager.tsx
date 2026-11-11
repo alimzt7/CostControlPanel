@@ -428,11 +428,6 @@ export default function ProductManager() {
           )}
         </section>
       </div>
-
-      <p className="local-storage-note">
-        اطلاعات این نمونه روی همین مرورگر ذخیره می‌شود و هنوز به پنل کاربری یا
-        پایگاه داده متصل نیست.
-      </p>
     </main>
   );
 }

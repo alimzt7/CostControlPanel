@@ -108,36 +108,37 @@ export default function MaterialManager() {
   const [historyId, setHistoryId] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const savedIngredients = localStorage.getItem(INGREDIENTS_KEY);
-      const savedProducts = localStorage.getItem(PRODUCTS_KEY);
-      const migrated = migrateDemoTomato(
-        savedIngredients
-          ? (JSON.parse(savedIngredients) as Ingredient[])
-          : initialIngredients,
-        savedProducts
-          ? (JSON.parse(savedProducts) as Product[])
-          : initialProducts,
-      );
-      const normalized = normalizeIngredients(
-        migrated.ingredients,
-        savedIngredients ? undefined : localIsoDate(),
-      );
-      setIngredients(normalized);
-      setProducts(migrated.products);
-      if (savedProducts)
-        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(migrated.products));
-    } catch {
-      setNotice(
-        "اطلاعات ذخیره‌شده خوانده نشد؛ داده‌های نمونه نمایش داده می‌شود.",
-      );
-    }
-    setReady(true);
+    const initializeFromStorage = () => {
+      try {
+        const savedIngredients = localStorage.getItem(INGREDIENTS_KEY);
+        const savedProducts = localStorage.getItem(PRODUCTS_KEY);
+        const migrated = migrateDemoTomato(
+          savedIngredients
+            ? (JSON.parse(savedIngredients) as Ingredient[])
+            : initialIngredients,
+          savedProducts
+            ? (JSON.parse(savedProducts) as Product[])
+            : initialProducts,
+        );
+        const normalized = normalizeIngredients(
+          migrated.ingredients,
+          savedIngredients ? undefined : localIsoDate(),
+        );
+        setIngredients(normalized);
+        setProducts(migrated.products);
+        if (savedProducts)
+          localStorage.setItem(PRODUCTS_KEY, JSON.stringify(migrated.products));
+      } catch {
+        setNotice(
+          "اطلاعات ذخیره‌شده خوانده نشد؛ داده‌های نمونه نمایش داده می‌شود.",
+        );
+      }
+      setPriceDate(localIsoDate());
+      setReady(true);
+    };
+    const timer = window.setTimeout(initializeFromStorage, 0);
+    return () => window.clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (!priceDate) setPriceDate(localIsoDate());
-  }, [priceDate]);
 
   useEffect(() => {
     if (ready)
@@ -260,15 +261,6 @@ export default function MaterialManager() {
         );
         return;
       }
-      if (
-        usageByIngredient.has(editingId) &&
-        baseUnit(current.purchaseUnit) !== baseUnit(unit)
-      ) {
-        setNotice(
-          "چون این ماده در دستور پخت استفاده شده، نوع واحد آن را نمی‌توان از وزن به حجم یا عدد تغییر داد.",
-        );
-        return;
-      }
       const priceChanged =
         current.purchasePrice !== parsedPrice ||
         current.purchaseQuantity !== parsedQuantity ||
@@ -352,8 +344,6 @@ export default function MaterialManager() {
     setNotice("ماده اولیه حذف شد.");
   }
 
-  const exampleCost = 100 * (50000 / toBaseQuantity(1, "kg"));
-
   return (
     <main className="main-area products-page materials-page">
       <div className="products-topbar">
@@ -382,34 +372,6 @@ export default function MaterialManager() {
           </button>
         </div>
       )}
-
-      <section
-        className="product-summary material-summary"
-        aria-label="خلاصه مواد اولیه"
-      >
-        <article>
-          <Icons name="products" className="summary-icon" />
-          <div>
-            <small>مواد اولیه ثبت‌شده</small>
-            <strong>{numberFormat.format(ingredients.length)}</strong>
-          </div>
-        </article>
-        <article>
-          <Icons name="history" className="summary-icon" />
-          <div>
-            <small>محصولات متصل به مواد</small>
-            <strong>
-              {numberFormat.format(
-                new Set(
-                  products.flatMap((product) =>
-                    product.recipe.map((line) => line.ingredientId),
-                  ),
-                ).size,
-              )}
-            </strong>
-          </div>
-        </article>
-      </section>
 
       <section className="panel material-form-panel" id="material-form">
         <div className="panel-heading product-panel-heading">
@@ -455,6 +417,18 @@ export default function MaterialManager() {
             </select>
           </label>
 
+          <label className="product-field">
+            <span>مقدار بسته‌ی خرید</span>
+            <input
+              type="number"
+              min="0.001"
+              step="any"
+              value={quantity}
+              onChange={(event) => setQuantity(event.target.value)}
+              placeholder="مثلاً ۱"
+              required
+            />
+          </label>
           <label className="product-field">
             <span>واحد خرید</span>
             <select
@@ -525,7 +499,7 @@ export default function MaterialManager() {
             <p>فیلتر بر اساس دسته، جست‌وجو، مشاهده‌ی تاریخچه و ویرایش قیمت.</p>
           </div>
           <span className="panel-step">
-            {numberFormat.format(ingredients.length)}
+            تعداد مواد اولیه ثبت شده: {numberFormat.format(ingredients.length)}
           </span>
         </div>
         <div className="material-filters">
