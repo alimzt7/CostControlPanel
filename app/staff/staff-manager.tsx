@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Icons from "../components/icons";
+import DashboardShortcut from "../components/dashboard-shortcut";
 import ShamsiDatePicker from "../components/shamsi-dare-picker";
 import { formatMoney, makeId, numberFormat } from "../lib/costing";
 
@@ -767,6 +768,7 @@ export default function StaffManager() {
         اطلاعات این نسخه روی همین مرورگر ذخیره می‌شود. سوابق پرداخت با تغییر
         وضعیت اشتغال پرسنل حذف نمی‌شوند.
       </p>
+      <DashboardShortcut />
     </main>
   );
 }

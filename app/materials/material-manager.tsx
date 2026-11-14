@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Icons from "../components/icons";
+import DashboardShortcut from "../components/dashboard-shortcut";
 import ShamsiDatePicker from "../components/shamsi-dare-picker";
 import {
   baseUnit,
@@ -394,9 +395,8 @@ export default function MaterialManager() {
     <main className="main-area products-page materials-page">
       <div className="products-topbar">
         <div>
-          <Link href="/products" className="back-link">
-            <Icons name="back" className="inline-icon" /> برگشت به محصولات و
-            دستور پخت
+          <Link href="/" className="back-link">
+            <Icons name="back" className="inline-icon" /> برگشت به داشبورد
           </Link>
           <p className="eyebrow">بانک مواد اولیه</p>
           <h1>مواد اولیه و قیمت خرید</h1>
@@ -828,6 +828,7 @@ export default function MaterialManager() {
           </section>
         </div>
       )}
+      <DashboardShortcut />
     </main>
   );
 }

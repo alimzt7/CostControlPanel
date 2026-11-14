@@ -713,6 +713,34 @@ a:focus-visible {
 .products-page {
   max-width: 1440px;
   margin: 0 auto;
+  padding-bottom: 96px;
+}
+.dashboard-shortcut {
+  position: fixed;
+  right: 28px;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid #58c990;
+  border-radius: 50%;
+  background: #1e8055;
+  color: #f3fff8;
+  box-shadow: 0 8px 24px #0007, 0 0 0 5px #20845724;
+  font-size: calc(22px + var(--font-size-bump));
+  text-decoration: none;
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+.dashboard-shortcut:hover {
+  transform: translateY(-3px);
+  background: #269765;
+  box-shadow: 0 12px 28px #0008, 0 0 0 6px #20845735;
+}
+.dashboard-shortcut:focus-visible {
+  outline: 2px solid #a2edc0;
+  outline-offset: 4px;
 }
 .products-topbar {
   display: flex;
@@ -941,6 +969,64 @@ a:focus-visible {
 .recipe-line select,
 .recipe-line input {
   height: 36px;
+}
+.recipe-line .recipe-ingredient-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 9px;
+  border: 1px solid #2c3b32;
+  border-radius: 9px;
+  background: #111813;
+  color: #e1eae4;
+  font: inherit;
+  font-size: calc(10px + var(--font-size-bump));
+  text-align: right;
+  cursor: pointer;
+}
+.recipe-line .recipe-ingredient-trigger:hover,
+.recipe-line .recipe-ingredient-trigger:focus-visible {
+  border-color: #4caa78;
+  background: #17231b;
+}
+.recipe-ingredient-trigger > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.recipe-ingredient-trigger > span:last-child {
+  display: flex;
+  flex: 0 0 auto;
+  color: #83d9aa;
+}
+.recipe-ingredient-trigger .icon-mask {
+  width: 12px;
+  height: 12px;
+}
+.ingredient-picker-backdrop {
+  z-index: 80;
+}
+.ingredient-picker-modal {
+  width: min(480px, 100%);
+  max-height: min(82vh, 700px);
+}
+.ingredient-category-select {
+  margin-bottom: 12px;
+}
+.ingredient-choice-list {
+  max-height: min(300px, 38vh);
+}
+.ingredient-choice-list .category-item-option {
+  width: 100%;
+  text-align: right;
+}
+.ingredient-choice-list .icon-mask {
+  width: 16px;
+  height: 16px;
 }
 .recipe-unit {
   color: #91a097;
@@ -1204,6 +1290,7 @@ a:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding-top: 25px;
 }
 .panel-heading-actions .text-button {
   white-space: nowrap;
@@ -2157,6 +2244,48 @@ body,
 .material-entry-modal .material-form-actions:has(.secondary-button) > button {
   flex: 1 1 0;
 }
+.product-entry-modal {
+  width: min(760px, 100%);
+  max-height: min(90vh, 860px);
+}
+.product-entry-modal .product-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.product-entry-modal .product-form-actions > button {
+  flex: 1 1 0;
+}
+.product-list-toolbar {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.product-search {
+  width: min(420px, 100%);
+}
+.product-list-toolbar > small {
+  padding-bottom: 10px;
+  color: #91a097;
+  white-space: nowrap;
+}
+.managed-product-title .edit-material {
+  margin-right: auto;
+}
+.managed-product-title .delete-product {
+  margin-right: 0;
+}
+.products-page .product-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 120;
+  width: min(520px, calc(100vw - 32px));
+  margin: 0;
+  transform: translateX(-50%);
+  box-shadow: 0 12px 36px #0008;
+}
 @media (max-width: 560px) {
   .material-entry-modal {
     padding: 18px;
@@ -2167,6 +2296,21 @@ body,
   .material-entry-modal .material-form-actions {
     grid-column: auto;
     flex-wrap: wrap;
+  }
+  .product-entry-modal {
+    padding: 18px;
+  }
+  .product-entry-modal .recipe-line {
+    grid-template-columns: minmax(0, 1fr) 72px 40px 27px;
+  }
+  .product-entry-modal .cost-preview {
+    grid-template-columns: 1fr 1fr;
+  }
+  .product-entry-modal .cost-preview > div:first-child {
+    grid-column: 1 / -1;
+  }
+  .product-list-toolbar {
+    align-items: stretch;
   }
 }
 .modal-close {
@@ -2938,6 +3082,16 @@ a:focus-visible {
   line-height: 1;
   vertical-align: -0.08em;
 }
+.icon-mask {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  background-color: currentColor;
+  mask: var(--icon-mask) center / contain no-repeat;
+  -webkit-mask: var(--icon-mask) center / contain no-repeat;
+  vertical-align: middle;
+}
 .welcome-icon {
   display: inline-block;
   font-size: 0.95em;
@@ -3464,4 +3618,15 @@ body,
   margin: 0;
   transform: translateX(-50%);
   box-shadow: 0 12px 36px #0008;
+}
+@media (max-width: 760px) {
+  .products-page {
+    padding-bottom: 92px;
+  }
+  .dashboard-shortcut {
+    right: 18px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 50px;
+    height: 50px;
+  }
 }

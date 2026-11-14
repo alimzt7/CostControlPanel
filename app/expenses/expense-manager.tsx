@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Icons from "../components/icons";
+import DashboardShortcut from "../components/dashboard-shortcut";
 import { formatMoney, makeId, numberFormat } from "../lib/costing";
 
 const EXPENSES_KEY = "hesabchi.expenses.v1";
@@ -428,6 +429,7 @@ export default function ExpenseManager() {
       <p className="local-storage-note">
         اطلاعات این نسخه روی همین مرورگر ذخیره می‌شود.
       </p>
+      <DashboardShortcut />
     </main>
   );
 }
