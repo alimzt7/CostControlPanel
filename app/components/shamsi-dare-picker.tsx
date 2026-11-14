@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { numberFormat } from "../lib/costing";
 import Icons from "./icons";
 
@@ -109,6 +110,9 @@ export default function ShamsiDatePicker({
   const [openPicker, setOpenPicker] = useState<"month" | "year" | null>(null);
   const [viewDate, setViewDate] = useState(value || localIsoDate());
   const pickerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
   const calendar = calendarFor(viewDate);
   const today = localIsoDate();
 
@@ -118,7 +122,8 @@ export default function ShamsiDatePicker({
     function closeWhenClickedOutside(event: PointerEvent) {
       if (
         event.target instanceof Node &&
-        !pickerRef.current?.contains(event.target)
+        !pickerRef.current?.contains(event.target) &&
+        !calendarRef.current?.contains(event.target)
       ) {
         setOpen(false);
         setOpenPicker(null);
@@ -129,6 +134,28 @@ export default function ShamsiDatePicker({
     return () =>
       document.removeEventListener("pointerdown", closeWhenClickedOutside);
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const width = Math.min(252, window.innerWidth - 24);
+      const height = calendarRef.current?.getBoundingClientRect().height ?? 390;
+      const left = Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12));
+      const top = rect.bottom + height + 12 > window.innerHeight
+        ? Math.max(12, rect.top - height - 7)
+        : rect.bottom + 7;
+      setPosition({ top, left });
+    };
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open, openPicker]);
 
   function moveMonth(amount: number) {
     const shifted = new Date(
@@ -141,6 +168,7 @@ export default function ShamsiDatePicker({
   return (
     <div className="jalali-picker" ref={pickerRef}>
       <button
+        ref={triggerRef}
         type="button"
         className="date-picker-trigger"
         onClick={() => {
@@ -160,9 +188,12 @@ export default function ShamsiDatePicker({
           : placeholder}
         <Icons className="date-chevron" />
       </button>
-      {open && (
+      {open && typeof document !== "undefined" && createPortal(
+        <div className="jalali-calendar-portal">
         <div
+          ref={calendarRef}
           className="jalali-calendar"
+          style={{ top: position.top, left: position.left }}
           role="dialog"
           aria-label="انتخاب تاریخ شمسی"
         >
@@ -303,6 +334,8 @@ export default function ShamsiDatePicker({
             برو به امروز
           </button>
         </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

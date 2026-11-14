@@ -47,6 +47,18 @@ function jalaliDateLabel(isoDate: string) {
   return persianCalendar.format(new Date(`${isoDate}T12:00:00Z`));
 }
 
+function latestPrice(history: IngredientPrice[]) {
+  return [...history]
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => entry.date)
+    .sort(
+      (left, right) =>
+        left.entry.date.localeCompare(right.entry.date) ||
+        left.index - right.index,
+    )
+    .at(-1)?.entry;
+}
+
 function normalizeCategory(ingredient: Ingredient): IngredientCategory {
   if (
     ingredientCategories.includes(ingredient.category as IngredientCategory)
@@ -79,10 +91,20 @@ function normalizeIngredients(
             },
           ]
         : [];
+    const latest = latestPrice(history);
     return {
       ...ingredient,
+      ...(latest
+        ? {
+            purchasePrice: latest.purchasePrice,
+            purchaseQuantity: latest.purchaseQuantity,
+            purchaseUnit: latest.purchaseUnit,
+          }
+        : {}),
       category: normalizeCategory(ingredient),
-      priceHistory: history,
+      priceHistory: [...history].sort((left, right) =>
+        left.date.localeCompare(right.date),
+      ),
     };
   });
 }
@@ -99,13 +121,12 @@ export default function MaterialManager() {
   const [category, setCategory] = useState<IngredientCategory | "">("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
-  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
-  const [categorySearch, setCategorySearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<
     IngredientCategory | "all"
   >("all");
   const [listSearch, setListSearch] = useState("");
   const [historyId, setHistoryId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     const initializeFromStorage = () => {
@@ -145,6 +166,12 @@ export default function MaterialManager() {
       localStorage.setItem(INGREDIENTS_KEY, JSON.stringify(ingredients));
   }, [ingredients, ready]);
 
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 3500);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
   function persistIngredients(next: Ingredient[]) {
     setIngredients(next);
     localStorage.setItem(INGREDIENTS_KEY, JSON.stringify(next));
@@ -163,15 +190,6 @@ export default function MaterialManager() {
     return usage;
   }, [products]);
 
-  const categoryIngredients = useMemo(
-    () => ingredients.filter((ingredient) => ingredient.category === category),
-    [ingredients, category],
-  );
-  const searchedCategoryIngredients = categoryIngredients.filter((ingredient) =>
-    ingredient.name
-      .toLocaleLowerCase("fa")
-      .includes(categorySearch.trim().toLocaleLowerCase("fa")),
-  );
   const visibleIngredients = ingredients.filter(
     (ingredient) =>
       (categoryFilter === "all" || ingredient.category === categoryFilter) &&
@@ -198,6 +216,7 @@ export default function MaterialManager() {
   }
 
   function startEditing(ingredient: Ingredient) {
+    setFormOpen(true);
     setEditingId(ingredient.id);
     setName(ingredient.name);
     setQuantity(String(ingredient.purchaseQuantity));
@@ -205,20 +224,16 @@ export default function MaterialManager() {
     setPrice(String(ingredient.purchasePrice));
     setCategory(ingredient.category ?? "سایر");
     setPriceDate(localIsoDate());
-    setCategoryPickerOpen(false);
-    setCategorySearch("");
-    document
-      .getElementById("material-form")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function prepareNewItem() {
     resetForm(true);
-    setCategoryPickerOpen(false);
-    setCategorySearch("");
-    document
-      .getElementById("material-form")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setFormOpen(true);
+  }
+
+  function closeForm() {
+    setFormOpen(false);
+    resetForm();
   }
 
   function updateHistory(
@@ -226,12 +241,10 @@ export default function MaterialManager() {
     entry: IngredientPrice,
   ): IngredientPrice[] {
     const history = current.priceHistory ?? [];
-    const existingIndex = history.findIndex((item) => item.date === entry.date);
-    const updated =
-      existingIndex >= 0
-        ? history.map((item, index) => (index === existingIndex ? entry : item))
-        : [...history, entry];
-    return updated.sort((left, right) => left.date.localeCompare(right.date));
+    // تاریخ به‌تنهایی شناسهٔ رکورد قیمت نیست؛ چند خرید در یک روز مجاز است.
+    return [...history, entry].sort((left, right) =>
+      left.date.localeCompare(right.date),
+    );
   }
 
   function submitIngredient(event: FormEvent<HTMLFormElement>) {
@@ -278,15 +291,8 @@ export default function MaterialManager() {
           purchaseUnit: unit,
         };
         const history = updateHistory(current, entry);
-        const latestDate = (current.priceHistory ?? [])
-          .filter((item) => item.date)
-          .reduce(
-            (latest, item) => (item.date > latest ? item.date : latest),
-            "",
-          );
-        const shouldSetCurrentPrice = !latestDate
-          ? priceDate >= localIsoDate()
-          : priceDate >= latestDate;
+        const latest = latestPrice(history);
+        const shouldSetCurrentPrice = latest === entry;
         nextIngredient = {
           ...nextIngredient,
           priceHistory: history,
@@ -318,23 +324,63 @@ export default function MaterialManager() {
         purchaseQuantity: parsedQuantity,
         purchaseUnit: unit,
       };
-      persistForm([
-        ...ingredients,
-        {
-          id: makeId(),
-          name: name.trim(),
-          category,
-          purchaseQuantity: parsedQuantity,
-          purchaseUnit: unit,
-          purchasePrice: parsedPrice,
-          priceHistory: [entry],
-        },
-      ]);
-      setNotice(
-        "ماده اولیه و قیمت آن ثبت شد و حالا در دستور پخت محصولات قابل انتخاب است.",
+      const normalizedName = name.trim().toLocaleLowerCase("fa");
+      const existing = ingredients.find(
+        (ingredient) =>
+          ingredient.name.trim().toLocaleLowerCase("fa") === normalizedName,
       );
+      if (existing) {
+        if (
+          usageByIngredient.has(existing.id) &&
+          baseUnit(existing.purchaseUnit) !== baseUnit(unit)
+        ) {
+          setNotice(
+            "این ماده در دستور پخت استفاده شده و نوع واحدش را نمی‌توان از وزن به حجم یا عدد تغییر داد.",
+          );
+          return;
+        }
+        const history = updateHistory(existing, entry);
+        const isLatestPrice = latestPrice(history) === entry;
+        const updated: Ingredient = {
+          ...existing,
+          category,
+          priceHistory: history,
+          ...(isLatestPrice
+            ? {
+                purchasePrice: parsedPrice,
+                purchaseQuantity: parsedQuantity,
+                purchaseUnit: unit,
+              }
+            : {}),
+        };
+        persistForm(
+          ingredients.map((ingredient) =>
+            ingredient.id === existing.id ? updated : ingredient,
+          ),
+        );
+        setNotice(
+          isLatestPrice
+            ? "قیمت جدید به تاریخچه اضافه شد و قیمت جاری به‌روز شد."
+            : "قیمت قدیمی به تاریخچه اضافه شد؛ قیمت جاری بدون تغییر ماند.",
+        );
+      } else {
+        persistForm([
+          ...ingredients,
+          {
+            id: makeId(),
+            name: name.trim(),
+            category,
+            purchaseQuantity: parsedQuantity,
+            purchaseUnit: unit,
+            purchasePrice: parsedPrice,
+            priceHistory: [entry],
+          },
+        ]);
+        setNotice("ماده اولیه جدید اضافه شد.");
+      }
     }
     resetForm();
+    if (editingId) setFormOpen(false);
   }
 
   function deleteIngredient(id: string) {
@@ -359,13 +405,20 @@ export default function MaterialManager() {
             تفکیک تاریخ دنبال کن.
           </p>
         </div>
-        <Link className="primary-button" href="#material-form">
+        <button
+          className="primary-button"
+          type="button"
+          onClick={prepareNewItem}
+        >
           <Icons name="add" className="inline-icon" /> ثبت ماده اولیه
-        </Link>
+        </button>
       </div>
 
       {notice && (
-        <div className="products-notice" role="status">
+        <div
+          className={`products-notice${formOpen ? " material-toast" : ""}`}
+          role="status"
+        >
           {notice}
           <button onClick={() => setNotice("")} aria-label="بستن پیام">
             <Icons name="close" />
@@ -373,124 +426,139 @@ export default function MaterialManager() {
         </div>
       )}
 
-      <section className="panel material-form-panel" id="material-form">
-        <div className="panel-heading product-panel-heading">
-          <div>
-            <h2>{editingId ? "ویرایش ماده اولیه" : "ثبت ماده اولیه جدید"}</h2>
-            <p>
-              دسته، مقدار و قیمت بسته‌ی خرید را وارد کن؛ قیمت واحد پایه محاسبه
-              می‌شود.
-            </p>
-          </div>
-          <span className="panel-step">۱</span>
-        </div>
-        <form className="ingredient-form" onSubmit={submitIngredient}>
-          <label className="product-field">
-            <span>نام ماده اولیه</span>
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="مثلاً گوجه‌فرنگی"
-              required
-            />
-          </label>
-          <label className="product-field">
-            <span>دسته‌بندی</span>
-            <select
-              value={category}
-              onChange={(event) => {
-                const next = event.target.value as IngredientCategory;
-                setCategory(next);
-                setCategorySearch("");
-                setCategoryPickerOpen(true);
-              }}
-              required
+      {formOpen && (
+        <div
+          className="material-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeForm();
+          }}
+        >
+          <section
+            className="panel material-form-panel material-modal material-entry-modal"
+            id="material-form"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="material-form-title"
+          >
+            <button
+              className="modal-close"
+              type="button"
+              onClick={closeForm}
+              aria-label="بستن فرم"
             >
-              <option value="" disabled>
-                انتخاب دسته
-              </option>
-              {ingredientCategories.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="product-field">
-            <span>مقدار بسته‌ی خرید</span>
-            <input
-              type="number"
-              min="0.001"
-              step="any"
-              value={quantity}
-              onChange={(event) => setQuantity(event.target.value)}
-              placeholder="مثلاً ۱"
-              required
-            />
-          </label>
-          <label className="product-field">
-            <span>واحد خرید</span>
-            <select
-              value={unit}
-              onChange={(event) => setUnit(event.target.value as PurchaseUnit)}
-            >
-              {purchaseUnits.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="product-field">
-            <span>قیمت بسته (تومان)</span>
-            <input
-              type="number"
-              min="1"
-              inputMode="numeric"
-              value={price}
-              onChange={(event) => setPrice(event.target.value)}
-              placeholder="مثلاً ۵۰۰۰۰"
-              required
-            />
-          </label>
-          <label className="product-field price-date-field">
-            <span>تاریخ ثبت قیمت (شمسی)</span>
-            <ShamsiDatePicker value={priceDate} onChange={setPriceDate} />
-          </label>
-          <div className="material-form-actions">
-            <button className="primary-button add-ingredient" type="submit">
-              {editingId ? (
-                "ذخیره قیمت و تغییرات"
-              ) : (
-                <>
-                  <Icons name="add" className="inline-icon" /> افزودن ماده
-                </>
-              )}
+              <Icons name="close" />
             </button>
-            {editingId && (
-              <button
-                className="secondary-button"
-                type="button"
-                onClick={() => resetForm()}
-              >
-                لغو ویرایش
-              </button>
+            <div className="panel-heading product-panel-heading">
+              <div>
+                <h2 id="material-form-title">
+                  {editingId ? "ویرایش ماده اولیه" : "ثبت ماده اولیه جدید"}
+                </h2>
+                <p>
+                  دسته، مقدار و قیمت بسته‌ی خرید را وارد کن؛ قیمت واحد پایه
+                  محاسبه می‌شود.
+                </p>
+              </div>
+            </div>
+            <form className="ingredient-form" onSubmit={submitIngredient}>
+              <label className="product-field">
+                <span>نام ماده اولیه</span>
+                <input
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="مثلاً گوجه‌فرنگی"
+                  required
+                />
+              </label>
+              <label className="product-field">
+                <span>دسته‌بندی</span>
+                <select
+                  value={category}
+                  onChange={(event) => {
+                    const next = event.target.value as IngredientCategory;
+                    setCategory(next);
+                  }}
+                  required
+                >
+                  <option value="" disabled>
+                    انتخاب دسته
+                  </option>
+                  {ingredientCategories.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="product-field">
+                <span>واحد خرید</span>
+                <select
+                  value={unit}
+                  onChange={(event) =>
+                    setUnit(event.target.value as PurchaseUnit)
+                  }
+                >
+                  {purchaseUnits.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="product-field">
+                <span>قیمت واحد (تومان)</span>
+                <input
+                  type="number"
+                  min="1"
+                  inputMode="numeric"
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
+                  placeholder="مثلاً ۵۰۰۰۰"
+                  required
+                />
+              </label>
+              <label className="product-field price-date-field">
+                <span>تاریخ ثبت قیمت (شمسی)</span>
+                <ShamsiDatePicker value={priceDate} onChange={setPriceDate} />
+              </label>
+              <div className="material-form-actions">
+                <button className="primary-button add-ingredient" type="submit">
+                  {editingId ? (
+                    "ذخیره قیمت و تغییرات"
+                  ) : (
+                    <>
+                      <Icons name="add" className="inline-icon" /> افزودن ماده
+                    </>
+                  )}
+                </button>
+                {editingId && (
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => resetForm()}
+                  >
+                    لغو ویرایش
+                  </button>
+                )}
+              </div>
+            </form>
+            {quantity && price && Number(quantity) > 0 && Number(price) > 0 && (
+              <p className="unit-price-preview">
+                قیمت هر {baseUnitLabel(baseUnit(unit))}:{" "}
+                <strong>
+                  {formatMoney(
+                    Number(price) / toBaseQuantity(Number(quantity), unit),
+                  )}
+                </strong>
+                <span>
+                  {" "}
+                  · این قیمت پایه در محاسبه‌ی دستور پخت استفاده می‌شود.
+                </span>
+              </p>
             )}
-          </div>
-        </form>
-        {quantity && price && Number(quantity) > 0 && Number(price) > 0 && (
-          <p className="unit-price-preview">
-            قیمت هر {baseUnitLabel(baseUnit(unit))}:{" "}
-            <strong>
-              {formatMoney(
-                Number(price) / toBaseQuantity(Number(quantity), unit),
-              )}
-            </strong>
-            <span> · این قیمت پایه در محاسبه‌ی دستور پخت استفاده می‌شود.</span>
-          </p>
-        )}
-      </section>
+          </section>
+        </div>
+      )}
 
       <section className="panel ingredient-panel material-list-panel">
         <div className="panel-heading product-panel-heading">
@@ -635,78 +703,6 @@ export default function MaterialManager() {
         ماده مبنای محاسبه‌ی همه‌ی محصولات است. اطلاعات فعلاً در همین مرورگر
         ذخیره می‌شود.
       </p>
-
-      {categoryPickerOpen && category && (
-        <div
-          className="material-modal-backdrop"
-          role="presentation"
-          onMouseDown={() => setCategoryPickerOpen(false)}
-        >
-          <section
-            className="material-modal category-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="category-dialog-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <button
-              className="modal-close"
-              onClick={() => setCategoryPickerOpen(false)}
-              aria-label="بستن"
-            >
-              <Icons name="close" />
-            </button>
-            <p className="eyebrow">فهرست دسته</p>
-            <h2 id="category-dialog-title">{category}</h2>
-            <p className="modal-description">
-              ماده‌ی موجود را برای ویرایش انتخاب کن یا یک مورد تازه بساز.
-            </p>
-            <label className="product-field modal-search">
-              <span>جست‌وجو در این دسته</span>
-              <input
-                autoFocus
-                value={categorySearch}
-                onChange={(event) => setCategorySearch(event.target.value)}
-                placeholder="نام ماده را بنویس"
-              />
-            </label>
-            <div className="category-item-list">
-              {searchedCategoryIngredients.length ? (
-                searchedCategoryIngredients.map((ingredient) => (
-                  <button
-                    className="category-item-option"
-                    key={ingredient.id}
-                    onClick={() => startEditing(ingredient)}
-                  >
-                    <span>
-                      <strong>{ingredient.name}</strong>
-                      <small>
-                        {formatMoney(ingredient.purchasePrice)} · هر{" "}
-                        {baseUnitLabel(baseUnit(ingredient.purchaseUnit))}:{" "}
-                        {formatMoney(unitPrice(ingredient))}
-                      </small>
-                    </span>
-                    <span>
-                      انتخاب <Icons name="choose" className="inline-icon" />
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <p className="category-empty">
-                  ماده‌ای با این نام در این دسته پیدا نشد.
-                </p>
-              )}
-            </div>
-            <button
-              className="primary-button category-add-button"
-              onClick={prepareNewItem}
-            >
-              <Icons name="add" className="inline-icon" /> افزودن ماده‌ی جدید به
-              دسته‌ی «{category}»
-            </button>
-          </section>
-        </div>
-      )}
 
       {historyIngredient && (
         <div

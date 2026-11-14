@@ -948,8 +948,9 @@ a:focus-visible {
   text-align: center;
 }
 .remove-line {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 27px;
   height: 27px;
   border: 1px solid #3b302d;
@@ -1362,6 +1363,12 @@ a:focus-visible {
 .jalali-picker {
   position: relative;
 }
+.jalali-calendar-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
 .date-picker-trigger {
   display: flex;
   align-items: center;
@@ -1386,16 +1393,30 @@ a:focus-visible {
   color: #84948a;
 }
 .jalali-calendar {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 7px);
-  right: 0;
+  position: fixed;
+  z-index: 1;
   width: 252px;
   padding: 12px;
   border: 1px solid #35483b;
   border-radius: 14px;
   background: #18211b;
   box-shadow: 0 18px 45px #0008;
+  pointer-events: auto;
+}
+@media (max-width: 560px) {
+  .jalali-calendar-portal {
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: #060a08a8;
+    pointer-events: auto;
+  }
+  .jalali-calendar-portal .jalali-calendar {
+    top: 50% !important;
+    left: 50% !important;
+    width: min(320px, calc(100vw - 32px));
+    transform: translate(-50%, -50%);
+  }
 }
 .calendar-heading {
   display: flex;
@@ -1531,6 +1552,9 @@ a:focus-visible {
   line-height: 1.9;
 }
 .modal-close {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   top: 15px;
   left: 15px;
@@ -2116,6 +2140,34 @@ body,
 }
 .material-modal {
   box-shadow: 0 25px 80px #26352c24;
+}
+.material-entry-modal {
+  width: min(760px, 100%);
+  max-height: min(88vh, 820px);
+}
+.material-entry-modal .ingredient-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.material-entry-modal .material-form-actions {
+  grid-column: 1 / -1;
+}
+.material-entry-modal .material-form-actions .add-ingredient {
+  flex: 1 1 100%;
+}
+.material-entry-modal .material-form-actions:has(.secondary-button) > button {
+  flex: 1 1 0;
+}
+@media (max-width: 560px) {
+  .material-entry-modal {
+    padding: 18px;
+  }
+  .material-entry-modal .ingredient-form {
+    grid-template-columns: 1fr;
+  }
+  .material-entry-modal .material-form-actions {
+    grid-column: auto;
+    flex-wrap: wrap;
+  }
 }
 .modal-close {
   background: #f4f7f4;
@@ -3402,4 +3454,14 @@ body,
 }
 .staff-page > .products-topbar .primary-button {
   color: #fff;
+}
+.materials-page .material-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 120;
+  width: min(520px, calc(100vw - 32px));
+  margin: 0;
+  transform: translateX(-50%);
+  box-shadow: 0 12px 36px #0008;
 }
