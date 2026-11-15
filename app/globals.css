@@ -1754,6 +1754,69 @@ a:focus-visible {
   background: #1d3528;
   color: #84d9a7;
 }
+.confirm-delete-backdrop {
+  z-index: 120;
+  backdrop-filter: blur(5px);
+}
+.confirm-delete-modal {
+  width: min(420px, 100%);
+  padding: 26px;
+}
+.confirm-delete-modal h2 {
+  margin: 0 0 10px;
+  color: #e6eee8;
+  font-size: calc(20px + var(--font-size-bump));
+}
+.confirm-delete-modal p {
+  margin: 0;
+  color: #aab8af;
+  line-height: 1.8;
+}
+.confirm-delete-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 22px;
+}
+.danger-button {
+  border: 1px solid #713d36;
+  border-radius: 10px;
+  padding: 9px 15px;
+  background: #482a28;
+  color: #ffd6cb;
+  cursor: pointer;
+}
+.danger-button:hover {
+  background: #60322e;
+}
+.remove-line[title],
+.remove-line[data-tooltip] {
+  position: relative;
+}
+.remove-line[data-tooltip]::after {
+  position: absolute;
+  z-index: 20;
+  right: 50%;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: 210px;
+  padding: 6px 9px;
+  border: 1px solid #34473a;
+  border-radius: 7px;
+  background: #171f1a;
+  color: #e2ece5;
+  content: attr(data-tooltip);
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(50%) translateY(3px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+.remove-line[data-tooltip]:hover::after,
+.remove-line[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(50%) translateY(0);
+}
 .history-change.neutral {
   background: #222c26;
   color: #a0ada4;

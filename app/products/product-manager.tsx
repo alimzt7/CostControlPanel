@@ -42,6 +42,7 @@ export default function ProductManager() {
   const [ingredientCategory, setIngredientCategory] = useState<
     IngredientCategory | "all"
   >("all");
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   useEffect(() => {
     try {
@@ -210,8 +211,13 @@ export default function ProductManager() {
     closeIngredientPicker();
   }
 
-  function removeProduct(id: string) {
-    setProducts((current) => current.filter((product) => product.id !== id));
+  function confirmRemoveProduct() {
+    if (!productToDelete) return;
+    setProducts((current) =>
+      current.filter((product) => product.id !== productToDelete.id),
+    );
+    setNotice(`محصول «${productToDelete.name}» حذف شد.`);
+    setProductToDelete(null);
   }
 
   function updateRecipeLine(index: number, patch: Partial<RecipeLine>) {
@@ -588,7 +594,9 @@ export default function ProductManager() {
                     </button>
                     <button
                       className="remove-line delete-product"
-                      onClick={() => removeProduct(product.id)}
+                      type="button"
+                      onClick={() => setProductToDelete(product)}
+                      title="حذف محصول"
                       aria-label={`حذف ${product.name}`}
                     >
                       <Icons name="close" />
@@ -630,6 +638,35 @@ export default function ProductManager() {
           </div>
         )}
       </section>
+      {productToDelete && (
+        <div
+          className="material-modal-backdrop confirm-delete-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setProductToDelete(null);
+          }}
+        >
+          <section
+            className="material-modal confirm-delete-modal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-product-title"
+            aria-describedby="delete-product-description"
+          >
+            <h2 id="delete-product-title">حذف محصول</h2>
+            <p id="delete-product-description">
+              آیا از حذف «{productToDelete.name}» مطمئن هستید؟ این کار قابل بازگشت نیست.
+            </p>
+            <div className="confirm-delete-actions">
+              <button className="secondary-button" type="button" onClick={() => setProductToDelete(null)}>
+                انصراف
+              </button>
+              <button className="danger-button" type="button" onClick={confirmRemoveProduct}>
+                حذف محصول
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
       <DashboardShortcut />
     </main>
   );

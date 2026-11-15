@@ -128,6 +128,7 @@ export default function MaterialManager() {
   const [listSearch, setListSearch] = useState("");
   const [historyId, setHistoryId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [ingredientToDelete, setIngredientToDelete] = useState<Ingredient | null>(null);
 
   useEffect(() => {
     const initializeFromStorage = () => {
@@ -389,6 +390,12 @@ export default function MaterialManager() {
     persistForm(ingredients.filter((ingredient) => ingredient.id !== id));
     if (editingId === id) resetForm();
     setNotice("ماده اولیه حذف شد.");
+  }
+
+  function confirmDeleteIngredient() {
+    if (!ingredientToDelete) return;
+    deleteIngredient(ingredientToDelete.id);
+    setIngredientToDelete(null);
   }
 
   return (
@@ -677,8 +684,10 @@ export default function MaterialManager() {
                           </button>
                           <button
                             className="remove-line"
-                            onClick={() => deleteIngredient(ingredient.id)}
+                            onClick={() => setIngredientToDelete(ingredient)}
                             disabled={usedBy > 0}
+                            type="button"
+                            data-tooltip={usedBy ? "این ماده در دستور پخت استفاده شده" : "حذف ماده اولیه"}
                             title={
                               usedBy
                                 ? "این ماده در دستور پخت استفاده شده؛ ابتدا از محصول جداش کن"
@@ -823,6 +832,35 @@ export default function MaterialManager() {
                 }}
               >
                 <Icons name="add" className="inline-icon" /> ثبت قیمت جدید
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+      {ingredientToDelete && (
+        <div
+          className="material-modal-backdrop confirm-delete-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIngredientToDelete(null);
+          }}
+        >
+          <section
+            className="material-modal confirm-delete-modal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-ingredient-title"
+            aria-describedby="delete-ingredient-description"
+          >
+            <h2 id="delete-ingredient-title">حذف ماده اولیه</h2>
+            <p id="delete-ingredient-description">
+              آیا از حذف «{ingredientToDelete.name}» مطمئن هستید؟ این کار قابل بازگشت نیست.
+            </p>
+            <div className="confirm-delete-actions">
+              <button className="secondary-button" type="button" onClick={() => setIngredientToDelete(null)}>
+                انصراف
+              </button>
+              <button className="danger-button" type="button" onClick={confirmDeleteIngredient}>
+                حذف ماده اولیه
               </button>
             </div>
           </section>
