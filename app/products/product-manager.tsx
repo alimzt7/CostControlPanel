@@ -102,6 +102,15 @@ export default function ProductManager() {
       );
   }, []);
 
+  useEffect(() => {
+    function refreshProducts() {
+      const saved = localStorage.getItem(PRODUCTS_KEY);
+      if (saved) setProducts(JSON.parse(saved) as Product[]);
+    }
+    window.addEventListener("hesabchi:products-updated", refreshProducts);
+    return () => window.removeEventListener("hesabchi:products-updated", refreshProducts);
+  }, []);
+
   const ingredientById = useMemo(
     () =>
       new Map<string, Ingredient>(
@@ -109,12 +118,19 @@ export default function ProductManager() {
       ),
     [ingredients],
   );
+  const hasCompleteRecipe = (product: Product) =>
+    product.recipe.length > 0 &&
+    product.recipe.every((line) => {
+      const ingredient = ingredientById.get(line.ingredientId);
+      return Boolean(ingredient && line.quantity > 0 && unitPrice(ingredient) > 0);
+    });
   const draftCost = recipeCost(recipe, ingredients);
   const priceValue = Number(sellingPrice) || 0;
   const draftMargin =
     priceValue > 0 ? ((priceValue - draftCost) / priceValue) * 100 : 0;
-  const averageMargin = products.length
-    ? products.reduce((sum, product) => {
+  const completeProducts = products.filter(hasCompleteRecipe);
+  const averageMargin = completeProducts.length
+    ? completeProducts.reduce((sum, product) => {
         const cost = recipeCost(product.recipe, ingredients);
         return (
           sum +
@@ -122,7 +138,7 @@ export default function ProductManager() {
             ? (product.sellingPrice - cost) / product.sellingPrice
             : 0)
         );
-      }, 0) / products.length
+      }, 0) / completeProducts.length
     : 0;
   const visibleProducts = products.filter((product) =>
     product.name
@@ -574,7 +590,8 @@ export default function ProductManager() {
           <div className="managed-product-list">
             {visibleProducts.map((product) => {
               const cost = recipeCost(product.recipe, ingredients);
-              const margin = product.sellingPrice
+              const recipeComplete = hasCompleteRecipe(product);
+              const margin = product.sellingPrice && recipeComplete
                 ? (product.sellingPrice - cost) / product.sellingPrice
                 : 0;
               return (
@@ -605,7 +622,7 @@ export default function ProductManager() {
                   <div className="managed-product-stats">
                     <div>
                       <small>بهای مواد</small>
-                      <strong>{formatMoney(cost)}</strong>
+                      <strong>{recipeComplete ? formatMoney(cost) : "نیازمند تکمیل"}</strong>
                     </div>
                     <div>
                       <small>قیمت فروش</small>
@@ -614,9 +631,9 @@ export default function ProductManager() {
                     <div>
                       <small>حاشیه سود</small>
                       <strong
-                        className={margin < 0 ? "loss-value" : "profit-value"}
+                        className={recipeComplete ? margin < 0 ? "loss-value" : "profit-value" : ""}
                       >
-                        {numberFormat.format(margin * 100)}٪
+                        {recipeComplete ? `${numberFormat.format(margin * 100)}٪` : "—"}
                       </strong>
                     </div>
                   </div>

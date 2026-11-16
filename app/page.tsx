@@ -77,11 +77,18 @@ const products = [
 const nav = [
   { icon: "dashboard", title: "داشبورد", active: true, href: "/" },
   {
+    icon: "orders",
+    title: "منوی محصولات",
+    active: false,
+    href: "/menu",
+  },
+  {
     icon: "products",
     title: "محصولات و دستور پخت",
     active: false,
     href: "/products",
   },
+
   {
     icon: "ingredients",
     title: "مواد اولیه",
@@ -399,6 +406,19 @@ export default function Home() {
             <h2>دسترسی سریع</h2>
           </div>
           <div className="quick-grid">
+            <a
+              className="quick-card"
+              href="/menu"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <span className="quick-icon">
+                <Icons name="orders" />
+              </span>
+              <div>
+                <strong>منوی بناکار</strong>
+                <span>انتخاب محصول و افزودن آن به فهرست محصولات</span>
+              </div>
+            </a>
             <a
               className="quick-card"
               href="/products#new-product"
