@@ -257,9 +257,6 @@ button {
 .stat-foot span {
   color: #98a29c;
 }
-.trend-down {
-  color: #da795f;
-}
 .content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(255px, 0.85fr);
@@ -590,9 +587,6 @@ button {
 .nav-label {
   color: #77877d;
 }
-.nav-link {
-  color: #a9b6ad;
-}
 .nav-link:hover {
   background: #1c2821;
   color: #78d6a8;
@@ -608,15 +602,6 @@ button {
 .profile-sub,
 .welcome p {
   color: #95a49a;
-}
-.icon-button,
-.period-select {
-  color: #d0dad3;
-  background: #171f1a;
-  border-color: #2a3730;
-}
-.notify-dot {
-  border-color: #171f1a;
 }
 .section-title a {
   color: #70d5a2;
@@ -650,19 +635,6 @@ button {
 .chart-y {
   color: #78877d;
 }
-.chart svg line {
-  stroke: #2b3831;
-}
-.chart svg circle {
-  stroke: #171f1a;
-}
-.cost-bar {
-  background: #29352e;
-}
-.cost-total {
-  border-color: #2a3730;
-  color: #98a69d;
-}
 .cost-total strong {
   color: #e4ece7;
 }
@@ -672,9 +644,6 @@ button {
 }
 .products-table td {
   border-color: #26332c;
-}
-.product-emoji {
-  background: #35291f;
 }
 .product-tag {
   color: #8de0b5;
@@ -695,11 +664,6 @@ button {
     background-color 0.18s ease,
     border-color 0.18s ease,
     transform 0.18s ease;
-}
-.stat-card:hover,
-.quick-card:hover {
-  background: #1a241e;
-  border-color: #34483b;
 }
 .quick-card:hover {
   transform: translateY(-2px);
@@ -831,45 +795,11 @@ a:focus-visible {
   font-size: calc(20px + var(--font-size-bump));
   cursor: pointer;
 }
-.product-summary {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 13px;
-  margin-bottom: 16px;
-}
-.product-summary article {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid #28352e;
-  border-radius: 15px;
-  background: #171f1a;
-}
-.summary-icon {
-  display: grid;
-  place-items: center;
-  width: 37px;
-  height: 37px;
-  border-radius: 12px;
-  background: #21362a;
-  color: #83d9aa;
-}
-.product-summary small,
 .managed-product-stats small {
   display: block;
   color: #91a097;
   font-size: calc(10px + var(--font-size-bump));
   margin-bottom: 5px;
-}
-.product-summary strong {
-  font-size: calc(16px + var(--font-size-bump));
-}
-.product-workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 15px;
-  align-items: start;
 }
 .product-form-panel,
 .product-list-panel,
@@ -1057,9 +987,6 @@ a:focus-visible {
   opacity: 0.32;
   cursor: not-allowed;
 }
-.remove-line:hover:not(:disabled) {
-  background: #482a28;
-}
 .cost-preview {
   display: grid;
   grid-template-columns: 1.2fr 1fr 0.7fr;
@@ -1236,26 +1163,6 @@ a:focus-visible {
   .products-topbar h1 {
     font-size: calc(18px + var(--font-size-bump));
   }
-  .product-summary {
-    gap: 8px;
-  }
-  .product-summary article {
-    padding: 11px;
-    gap: 8px;
-  }
-  .product-summary small {
-    font-size: calc(9px + var(--font-size-bump));
-  }
-  .product-summary strong {
-    font-size: calc(13px + var(--font-size-bump));
-  }
-  .summary-icon {
-    width: 31px;
-    height: 31px;
-  }
-  .product-workspace {
-    grid-template-columns: 1fr;
-  }
   .ingredient-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1271,12 +1178,6 @@ a:focus-visible {
     min-height: 35px;
     padding: 0 10px;
     font-size: calc(10px + var(--font-size-bump));
-  }
-  .product-summary {
-    grid-template-columns: 1fr;
-  }
-  .product-summary article {
-    min-height: 58px;
   }
   .recipe-line {
     grid-template-columns: minmax(0, 1fr) 66px 48px 27px;
@@ -1309,41 +1210,6 @@ a:focus-visible {
 .materials-page .ingredient-form {
   grid-template-columns: 1.2fr 0.65fr 0.85fr 1fr auto;
 }
-.material-example {
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-  padding: 15px 17px;
-  margin-bottom: 14px;
-  background: linear-gradient(110deg, #19281f, #171f1a);
-  border-color: #2b4836;
-}
-.material-example-icon {
-  display: grid;
-  place-items: center;
-  flex: 0 0 34px;
-  height: 34px;
-  border-radius: 11px;
-  background: #23432f;
-  color: #82dcaa;
-}
-.material-example strong {
-  color: #d9e9df;
-  font-size: calc(11px + var(--font-size-bump));
-}
-.material-example p {
-  margin: 5px 0 0;
-  color: #9dad9f;
-  font-size: calc(10px + var(--font-size-bump));
-  line-height: 1.9;
-}
-.material-example b {
-  color: #83d9aa;
-  font-weight: 700;
-}
-.material-summary {
-  margin-bottom: 14px;
-}
 .material-form-panel {
   margin-bottom: 14px;
 }
@@ -1365,9 +1231,6 @@ a:focus-visible {
   font: inherit;
   font-size: calc(10px + var(--font-size-bump));
   cursor: pointer;
-}
-.secondary-button:hover {
-  background: #233128;
 }
 .unit-price-preview {
   color: #9aa99f;
@@ -1398,9 +1261,6 @@ a:focus-visible {
 .edit-material:hover {
   background: #25402f;
 }
-.editing-material-row {
-  background: #1a2920;
-}
 @media (max-width: 950px) {
   .materials-page .ingredient-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1410,18 +1270,6 @@ a:focus-visible {
   }
 }
 @media (max-width: 760px) {
-  .material-example {
-    padding: 12px;
-  }
-  .material-summary {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .material-summary article {
-    min-height: 68px;
-  }
-  .materials-page .ingredient-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .material-form-actions {
     grid-column: span 2;
   }
@@ -1430,15 +1278,6 @@ a:focus-visible {
   }
 }
 @media (max-width: 430px) {
-  .material-summary {
-    grid-template-columns: 1fr;
-  }
-  .material-summary article {
-    min-height: 57px;
-  }
-  .material-example p {
-    font-size: calc(9px + var(--font-size-bump));
-  }
   .panel-heading-actions {
     align-items: flex-end;
     flex-direction: column-reverse;
@@ -1712,10 +1551,6 @@ a:focus-visible {
   font-size: calc(10px + var(--font-size-bump));
   line-height: 1.8;
 }
-.category-add-button {
-  width: 100%;
-  margin-top: 13px;
-}
 .history-list {
   display: flex;
   flex-direction: column;
@@ -1912,17 +1747,10 @@ a:focus-visible {
   --green: #16845b;
   --line: #e1e8e2;
 }
-html,
-body,
-.app-shell {
-  background: var(--background);
-  color: var(--foreground);
-}
 .sidebar,
 .stat-card,
 .panel,
 .quick-card,
-.product-summary article,
 .product-form-panel,
 .product-list-panel,
 .ingredient-panel,
@@ -1935,7 +1763,6 @@ body,
 .stat-icon,
 .cost-symbol,
 .quick-icon,
-.summary-icon,
 .panel-step {
   background: #e8f5ed !important;
   color: #16845b !important;
@@ -1956,15 +1783,12 @@ body,
 .chart-labels,
 .chart-y,
 .quick-card span,
-.product-summary small,
 .product-panel-heading p,
 .recipe-unit,
 .cost-preview small,
 .calculation-note,
 .managed-product-title p,
 .local-storage-note,
-.material-eyebrow,
-.material-toolbar > small,
 .history-current-price > span,
 .modal-description,
 .category-item-option small,
@@ -2022,7 +1846,6 @@ body,
   color: #66756b;
 }
 .cost-total strong,
-.product-summary strong,
 .cost-preview strong,
 .empty-products strong,
 .managed-product-title h3,
@@ -2045,8 +1868,6 @@ body,
   background: #eaf5ee;
 }
 .products-topbar,
-.category-banner,
-.material-category-picker,
 .category-item-option {
   color: #176f4b;
   background: #edf6ef;
@@ -2084,7 +1905,6 @@ body,
 }
 .cost-preview,
 .ingredient-chips span,
-.material-filter select,
 .history-entry,
 .category-item-list .category-item-option {
   background: #f4f8f4;
@@ -2115,27 +1935,17 @@ body,
 .remove-line:hover:not(:disabled) {
   background: #ffe8e2;
 }
-.material-tabs,
-.material-filter-bar,
-.material-list-panel,
-.material-history-panel {
+.material-list-panel {
   background: #fff;
   border-color: #e2e9e3;
 }
-.material-example {
-  background: linear-gradient(110deg, #f1f8f2, #fff);
-  border-color: #dce9de;
-}
-.material-example strong,
 .calendar-heading strong {
   color: #304036;
 }
-.material-example p,
 .unit-price-preview,
 .material-filters > small {
   color: #738178;
 }
-.material-example b,
 .unit-price-preview strong,
 .date-picker-trigger > span:first-child {
   color: #16845b;
@@ -2277,17 +2087,14 @@ body,
 .secondary-button:hover {
   background: #edf4ee;
 }
-.material-table th,
 .ingredient-table th {
   color: #66756b;
   border-color: #e2e9e3;
 }
-.material-table td,
 .ingredient-table td {
   color: #34433a;
   border-color: #edf1ed;
 }
-.material-table tr:hover,
 .ingredient-table tr:hover {
   background: #f7faf7;
 }
@@ -2397,8 +2204,7 @@ body,
 .category-item-option strong {
   color: #34433a;
 }
-.category-empty,
-.empty-materials {
+.category-empty {
   color: #718078;
   border-color: #dce6de;
 }
@@ -2469,7 +2275,6 @@ body,
   color: #26352c;
   font-size: calc(16px + var(--font-size-bump));
 }
-.expense-form-panel,
 .expense-list-panel {
   margin-bottom: 14px;
 }
@@ -2770,7 +2575,6 @@ body,
   color: #26352c;
   font-size: calc(16px + var(--font-size-bump));
 }
-.staff-form-panel,
 .staff-pay-panel,
 .staff-list-panel,
 .payroll-list-panel {
@@ -3124,7 +2928,6 @@ body,
     width: 100%;
   }
 }
-.material-tabs button.active,
 .primary-button,
 .add-ingredient,
 .save-product {
@@ -3192,11 +2995,6 @@ a:focus-visible {
   margin-right: auto;
   color: #738178;
 }
-.calendar-selector-arrow {
-  width: 12px;
-  height: 12px;
-  color: currentColor;
-}
 .history-down-arrow {
   width: 12px;
   height: 12px;
@@ -3232,15 +3030,11 @@ body,
 .stat-card,
 .panel,
 .quick-card,
-.product-summary article,
 .product-form-panel,
 .product-list-panel,
 .ingredient-panel,
 .managed-product,
-.material-tabs,
-.material-filter-bar,
 .material-list-panel,
-.material-history-panel,
 .expense-stat {
   background: #171f1a;
   border-color: #29372f;
@@ -3249,7 +3043,6 @@ body,
 .stat-icon,
 .cost-symbol,
 .quick-icon,
-.summary-icon,
 .panel-step {
   background: #21362a !important;
   color: #83d9aa !important;
@@ -3266,15 +3059,12 @@ body,
 .chart-labels,
 .chart-y,
 .quick-card span,
-.product-summary small,
 .product-panel-heading p,
 .recipe-unit,
 .cost-preview small,
 .calculation-note,
 .managed-product-title p,
 .local-storage-note,
-.material-eyebrow,
-.material-toolbar > small,
 .history-current-price > span,
 .modal-description,
 .category-item-option small,
@@ -3335,7 +3125,6 @@ body,
   color: #98a69d;
 }
 .cost-total strong,
-.product-summary strong,
 .cost-preview strong,
 .empty-products strong,
 .managed-product-title h3,
@@ -3347,18 +3136,15 @@ body,
   color: #e4ece7;
 }
 .products-table th,
-.material-table th,
 .ingredient-table th {
   color: #98a69d;
   border-color: #2a3730;
 }
 .products-table td,
-.material-table td,
 .ingredient-table td {
   color: #cbd7cf;
   border-color: #29372f;
 }
-.material-table tr:hover,
 .ingredient-table tr:hover {
   background: #1a241e;
 }
@@ -3372,8 +3158,6 @@ body,
   background: #1d3528;
 }
 .products-topbar,
-.category-banner,
-.material-category-picker,
 .category-item-option {
   color: #cdd8d0;
   background: #171f1a;
@@ -3412,7 +3196,6 @@ body,
 }
 .cost-preview,
 .ingredient-chips span,
-.material-filter select,
 .history-entry,
 .category-item-list .category-item-option {
   background: #141c17;
@@ -3421,12 +3204,10 @@ body,
 }
 .empty-inline,
 .empty-products,
-.category-empty,
-.empty-materials {
+.category-empty {
   color: #95a49a;
 }
-.empty-inline,
-.empty-materials {
+.empty-inline {
   border-color: #34453a;
 }
 .managed-product-stats,
@@ -3441,20 +3222,13 @@ body,
 .remove-line:hover:not(:disabled) {
   background: #482a28;
 }
-.material-example {
-  background: linear-gradient(110deg, #19281f, #171f1a);
-  border-color: #2b4836;
-}
-.material-example strong,
 .calendar-heading strong {
   color: #d9e9df;
 }
-.material-example p,
 .unit-price-preview,
 .material-filters > small {
   color: #95a49a;
 }
-.material-example b,
 .unit-price-preview strong,
 .date-picker-trigger > span:first-child {
   color: #78d6a8;
@@ -3553,24 +3327,9 @@ body,
 .menu-page {
   padding-bottom: 76px;
 }
-.menu-auth-panel {
-  width: min(520px, 100%);
-  margin: 28px auto;
-  padding: 25px;
-}
-.menu-auth-panel h2,
 .menu-import-modal h2 {
   margin: 0 0 10px;
   color: #e6eee8;
-}
-.menu-auth-form {
-  display: grid;
-  gap: 14px;
-  margin-top: 20px;
-}
-.menu-auth-error {
-  margin: 0;
-  color: #f0a18b;
 }
 .menu-catalog-panel {
   padding: 20px;
