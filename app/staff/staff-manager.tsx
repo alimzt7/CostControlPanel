@@ -156,7 +156,8 @@ export default function StaffManager() {
     0,
   );
   const employerInsuranceTotal = activeStaff.reduce(
-    (sum, person) => sum + (person.insured ? (person.employerInsuranceMonthly ?? 0) : 0),
+    (sum, person) =>
+      sum + (person.insured ? (person.employerInsuranceMonthly ?? 0) : 0),
     0,
   );
   const paid = monthlyPayroll
@@ -410,7 +411,7 @@ export default function StaffManager() {
         <article className="staff-stat">
           <Icons name="payroll" className="staff-stat-icon payroll" />
           <div>
-            <small>هزینهٔ ماهانهٔ پرسنل</small>
+            <small>جمع حقوق ماهانه پرسنل</small>
             <strong>{formatMoney(estimated)}</strong>
             <span>حقوق پایه + مزایا و پاداش + بیمه − کسورات</span>
           </div>
@@ -426,7 +427,7 @@ export default function StaffManager() {
         <article className="staff-stat">
           <Icons name="payroll" className="staff-stat-icon" />
           <div>
-            <small>بیمهٔ ماهانهٔ کارفرما</small>
+            <small>سهم بیمه ماهانه شما</small>
             <strong>{formatMoney(employerInsuranceTotal)}</strong>
             <span>مجموع مبلغ ثبت‌شده برای پرسنل فعال</span>
           </div>
@@ -476,7 +477,7 @@ export default function StaffManager() {
                   <div>
                     <p className="eyebrow">مدیریت تیم</p>
                     <h2 id="staff-add-title">افزودن پرسنل</h2>
-                    <span>اطلاعات همکاری و حقوق ماهانه را وارد کن.</span>
+                    <span>اطلاعات همکاری و حقوق ماهانه.</span>
                   </div>
                   <button
                     type="button"
@@ -526,7 +527,6 @@ export default function StaffManager() {
                   </label>
                   <div className="staff-form-subheading">
                     <strong>اطلاعات تکمیلی و حقوقی</strong>
-                    <span>برای برآورد بهتر حقوق ماهانه</span>
                   </div>
                   <label className="product-field">
                     <span>وضعیت تأهل</span>
@@ -595,7 +595,7 @@ export default function StaffManager() {
                   </label>
                   {insured && (
                     <label className="product-field">
-                      <span>هزینهٔ ماهانهٔ بیمهٔ کارفرما (تومان)</span>
+                      <span>هزینه ماهانه بیمه کارفرما (تومان)</span>
                       <input
                         type="number"
                         min="0"
@@ -605,7 +605,7 @@ export default function StaffManager() {
                             Math.max(0, Number(event.target.value) || 0),
                           )
                         }
-                        placeholder="در صورت اطلاع وارد کن"
+                        placeholder="سهم بیمه پرداختی از طرف شما"
                       />
                     </label>
                   )}
