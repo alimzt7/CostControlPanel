@@ -728,15 +728,22 @@ a:focus-visible {
   border-radius: 50%;
   background: #1e8055;
   color: #f3fff8;
-  box-shadow: 0 8px 24px #0007, 0 0 0 5px #20845724;
+  box-shadow:
+    0 8px 24px #0007,
+    0 0 0 5px #20845724;
   font-size: calc(22px + var(--font-size-bump));
   text-decoration: none;
-  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+  transition:
+    transform 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease;
 }
 .dashboard-shortcut:hover {
   transform: translateY(-3px);
   background: #269765;
-  box-shadow: 0 12px 28px #0008, 0 0 0 6px #20845735;
+  box-shadow:
+    0 12px 28px #0008,
+    0 0 0 6px #20845735;
 }
 .dashboard-shortcut:focus-visible {
   outline: 2px solid #a2edc0;
@@ -1810,7 +1817,9 @@ a:focus-visible {
   opacity: 0;
   pointer-events: none;
   transform: translateX(50%) translateY(3px);
-  transition: opacity .15s ease, transform .15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .remove-line[data-tooltip]:hover::after,
 .remove-line[data-tooltip]:focus-visible::after {
@@ -3662,7 +3671,7 @@ body,
 }
 .menu-add-button:disabled {
   cursor: default;
-  opacity: .75;
+  opacity: 0.75;
 }
 .menu-state {
   padding: 35px 18px;
@@ -3743,6 +3752,34 @@ body,
 }
 .expense-amount {
   color: #dce7df;
+}
+.expense-entry-modal {
+  width: min(720px, 100%);
+  max-height: min(90vh, 820px);
+}
+.expense-entry-modal .expense-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 20px;
+}
+.expense-entry-modal .expense-note-field,
+.expense-entry-modal .expense-submit {
+  grid-column: 1 / -1;
+}
+.expense-entry-modal .expense-submit {
+  min-height: 44px;
+}
+.expense-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.expense-edit {
+  min-height: 30px;
+  padding: 4px 9px;
+  font-size: calc(10px + var(--font-size-bump));
+}
+.expense-row-actions .expense-delete {
+  flex: 0 0 30px;
 }
 .expense-empty strong {
   color: #e4ece7;
@@ -3832,6 +3869,28 @@ body,
   background: #202a23;
   border-color: #34433a;
   color: #aab8af;
+}
+.expense-entry-modal .expense-form .product-field input,
+.expense-entry-modal .expense-form .product-field select {
+  background: #111813;
+  border-color: #2c3b32;
+  color: #e1eae4;
+}
+.expense-entry-modal .expense-form .product-field input:focus,
+.expense-entry-modal .expense-form .product-field select:focus {
+  border-color: #4a9d6c;
+}
+@media (max-width: 620px) {
+  .expense-entry-modal {
+    padding: 20px 16px;
+  }
+  .expense-entry-modal .expense-form {
+    grid-template-columns: 1fr;
+  }
+  .expense-entry-modal .expense-note-field,
+  .expense-entry-modal .expense-submit {
+    grid-column: auto;
+  }
 }
 .staff-insurance-toggle {
   color: #c1cec5;

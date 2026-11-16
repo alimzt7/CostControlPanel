@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Icons from "../components/icons";
 import DashboardShortcut from "../components/dashboard-shortcut";
+import ShamsiDatePicker from "../components/shamsi-dare-picker";
 import { formatMoney, makeId, numberFormat } from "../lib/costing";
 
 const EXPENSES_KEY = "hesabchi.expenses.v1";
@@ -96,6 +97,9 @@ export default function ExpenseManager() {
   const [filter, setFilter] = useState<"همه" | ExpenseGroup>("همه");
   const [search, setSearch] = useState("");
   const [notice, setNotice] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
 
   useEffect(() => {
     try {
@@ -114,6 +118,19 @@ export default function ExpenseManager() {
   useEffect(() => {
     if (ready) localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
   }, [expenses, ready]);
+
+  useEffect(() => {
+    if (!formOpen && !deleteTarget) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setFormOpen(false);
+        setDeleteTarget(null);
+        setEditingId(null);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [formOpen, deleteTarget]);
 
   const monthKey = jalaliMonthKey(localIsoDate());
   const monthExpenses = expenses.filter(
@@ -153,29 +170,59 @@ export default function ExpenseManager() {
       !date
     )
       return;
-    setExpenses((current) => [
-      {
-        id: makeId(),
-        title: title.trim(),
-        amount: numericAmount,
-        group,
-        category,
-        date,
-        recurring,
-        note: note.trim(),
-      },
-      ...current,
-    ]);
+    const nextExpense: Expense = {
+      id: editingId ?? makeId(),
+      title: title.trim(),
+      amount: numericAmount,
+      group,
+      category,
+      date,
+      recurring,
+      note: note.trim(),
+    };
+    setExpenses((current) =>
+      editingId
+        ? current.map((expense) =>
+            expense.id === editingId ? nextExpense : expense,
+          )
+        : [nextExpense, ...current],
+    );
     setTitle("");
     setAmount("");
     setNote("");
     setRecurring(false);
-    setNotice("هزینه با موفقیت ثبت شد.");
+    setEditingId(null);
+    setFormOpen(false);
+    setNotice(editingId ? "تغییرات هزینه ذخیره شد." : "هزینه با موفقیت ثبت شد.");
   }
 
   function changeGroup(value: ExpenseGroup) {
     setGroup(value);
     setCategory(categories[value][0]);
+  }
+
+  function openNewExpense() {
+    setEditingId(null);
+    setTitle("");
+    setAmount("");
+    setGroup("هزینه جاری");
+    setCategory(categories["هزینه جاری"][0]);
+    setDate(localIsoDate());
+    setRecurring(false);
+    setNote("");
+    setFormOpen(true);
+  }
+
+  function openEditExpense(expense: Expense) {
+    setEditingId(expense.id);
+    setTitle(expense.title);
+    setAmount(String(expense.amount));
+    setGroup(expense.group);
+    setCategory(expense.category);
+    setDate(expense.date);
+    setRecurring(expense.recurring);
+    setNote(expense.note);
+    setFormOpen(true);
   }
 
   return (
@@ -191,9 +238,9 @@ export default function ExpenseManager() {
             هزینه‌های ثابت، جاری، سربار و حقوق پرسنل را یک‌جا ثبت و پیگیری کن.
           </p>
         </div>
-        <a className="primary-button" href="#expense-form">
+        <button className="primary-button" type="button" onClick={openNewExpense}>
           <Icons name="add" className="inline-icon" /> ثبت هزینه
-        </a>
+        </button>
       </header>
 
       {notice && (
@@ -236,18 +283,43 @@ export default function ExpenseManager() {
         </article>
       </section>
 
-      <section className="panel expense-form-panel" id="expense-form">
-        <div className="panel-heading product-panel-heading">
-          <div>
-            <h2>ثبت هزینه جدید</h2>
-            <p>
-              مبلغ را به تومان وارد کن؛ دسته‌بندی هزینه برای گزارش‌گیری ذخیره
-              می‌شود.
-            </p>
-          </div>
-          <span className="panel-step">۱</span>
-        </div>
-        <form className="expense-form" onSubmit={submitExpense}>
+      {formOpen && (
+        <div
+          className="material-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setFormOpen(false);
+              setEditingId(null);
+            }
+          }}
+        >
+          <section
+            className="panel material-modal expense-entry-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="expense-form-title"
+          >
+            <button
+              className="modal-close"
+              type="button"
+              onClick={() => {
+                setFormOpen(false);
+                setEditingId(null);
+              }}
+              aria-label="بستن فرم"
+            >
+              <Icons name="close" />
+            </button>
+            <div className="panel-heading product-panel-heading">
+              <div>
+                <p className="eyebrow">مدیریت هزینه‌های کسب‌وکار</p>
+                <h2 id="expense-form-title">
+                  {editingId ? "ویرایش هزینه" : "ثبت هزینه جدید"}
+                </h2>
+                <p>مبلغ را به تومان وارد کن و تاریخ شمسی هزینه را انتخاب کن.</p>
+              </div>
+            </div>
+            <form className="expense-form" onSubmit={submitExpense}>
           <label className="product-field">
             <span>عنوان هزینه</span>
             <input
@@ -293,12 +365,7 @@ export default function ExpenseManager() {
           </label>
           <label className="product-field">
             <span>تاریخ ثبت</span>
-            <input
-              required
-              type="date"
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-            />
+            <ShamsiDatePicker value={date} onChange={setDate} />
           </label>
           <label className="product-field expense-note-field">
             <span>توضیحات (اختیاری)</span>
@@ -320,10 +387,12 @@ export default function ExpenseManager() {
             </span>
           </label>
           <button className="primary-button expense-submit" type="submit">
-            ثبت هزینه
+            {editingId ? "ذخیره تغییرات" : "ثبت هزینه"}
           </button>
         </form>
-      </section>
+          </section>
+        </div>
+      )}
 
       <section className="panel expense-list-panel">
         <div className="panel-heading product-panel-heading expense-list-heading">
@@ -366,7 +435,7 @@ export default function ExpenseManager() {
                   <th>نوع</th>
                   <th>تاریخ</th>
                   <th>مبلغ</th>
-                  <th>حذف</th>
+                  <th>عملیات</th>
                 </tr>
               </thead>
               <tbody>
@@ -392,18 +461,24 @@ export default function ExpenseManager() {
                       {formatMoney(expense.amount)}
                     </td>
                     <td>
-                      <button
-                        className="remove-line expense-delete"
-                        type="button"
-                        onClick={() =>
-                          setExpenses((current) =>
-                            current.filter((item) => item.id !== expense.id),
-                          )
-                        }
-                        aria-label={`حذف ${expense.title}`}
-                      >
-                        <Icons name="close" />
-                      </button>
+                      <div className="expense-row-actions">
+                        <button
+                          className="secondary-button expense-edit"
+                          type="button"
+                          onClick={() => openEditExpense(expense)}
+                        >
+                          ویرایش
+                        </button>
+                        <button
+                          className="remove-line expense-delete"
+                          type="button"
+                          onClick={() => setDeleteTarget(expense)}
+                          aria-label={`حذف ${expense.title}`}
+                          title="حذف هزینه"
+                        >
+                          <Icons name="close" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -421,11 +496,53 @@ export default function ExpenseManager() {
             <p>
               {expenses.length
                 ? "عبارت جست‌وجو یا فیلتر نوع هزینه را تغییر بده."
-                : "اولین هزینه‌ی کسب‌وکارت را از فرم بالا ثبت کن تا جمع هزینه‌های ماهانه نمایش داده شود."}
+                : "اولین هزینه‌ی کسب‌وکارت را ثبت کن تا جمع هزینه‌های ماهانه نمایش داده شود."}
             </p>
+            {!expenses.length && (
+              <button className="primary-button" type="button" onClick={openNewExpense}>
+                <Icons name="add" className="inline-icon" /> ثبت اولین هزینه
+              </button>
+            )}
           </div>
         )}
       </section>
+      {deleteTarget && (
+        <div
+          className="material-modal-backdrop confirm-delete-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setDeleteTarget(null);
+          }}
+        >
+          <section
+            className="material-modal confirm-delete-modal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="expense-delete-title"
+          >
+            <h2 id="expense-delete-title">حذف این هزینه؟</h2>
+            <p>
+              هزینهٔ «{deleteTarget.title}» از فهرست حذف می‌شود. این کار قابل
+              بازگشت نیست.
+            </p>
+            <div className="confirm-delete-actions">
+              <button className="secondary-button" type="button" onClick={() => setDeleteTarget(null)}>
+                انصراف
+              </button>
+              <button
+                className="danger-button"
+                type="button"
+                onClick={() => {
+                  setExpenses((current) => current.filter((item) => item.id !== deleteTarget.id));
+                  setDeleteTarget(null);
+                  setNotice("هزینه حذف شد.");
+                }}
+              >
+                حذف هزینه
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
       <p className="local-storage-note">
         اطلاعات این نسخه روی همین مرورگر ذخیره می‌شود.
       </p>

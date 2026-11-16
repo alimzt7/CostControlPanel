@@ -142,10 +142,14 @@ export default function ShamsiDatePicker({
       if (!rect) return;
       const width = Math.min(252, window.innerWidth - 24);
       const height = calendarRef.current?.getBoundingClientRect().height ?? 390;
-      const left = Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12));
-      const top = rect.bottom + height + 12 > window.innerHeight
-        ? Math.max(12, rect.top - height - 7)
-        : rect.bottom + 7;
+      const left = Math.max(
+        12,
+        Math.min(rect.right - width, window.innerWidth - width - 12),
+      );
+      const top =
+        rect.bottom + height + 12 > window.innerHeight
+          ? Math.max(12, rect.top - height - 7)
+          : rect.bottom + 7;
       setPosition({ top, left });
     };
     updatePosition();
@@ -188,155 +192,158 @@ export default function ShamsiDatePicker({
           : placeholder}
         <Icons className="date-chevron" />
       </button>
-      {open && typeof document !== "undefined" && createPortal(
-        <div className="jalali-calendar-portal">
-        <div
-          ref={calendarRef}
-          className="jalali-calendar"
-          style={{ top: position.top, left: position.left }}
-          role="dialog"
-          aria-label="انتخاب تاریخ شمسی"
-        >
-          <div className="calendar-heading">
-            <button
-              className="flex items-center justify-center"
-              type="button"
-              onClick={() => moveMonth(-1)}
-              aria-label="ماه قبل"
-            >
-              <Icons name="previous" />
-            </button>
-            <div className="calendar-heading-selection">
-              <button
-                type="button"
-                className="calendar-selector"
-                aria-haspopup="listbox"
-                aria-expanded={openPicker === "month"}
-                onClick={() =>
-                  setOpenPicker(openPicker === "month" ? null : "month")
-                }
-              >
-                {calendar.month}
-              </button>
-              <button
-                type="button"
-                className="calendar-selector"
-                aria-haspopup="listbox"
-                aria-expanded={openPicker === "year"}
-                onClick={() =>
-                  setOpenPicker(openPicker === "year" ? null : "year")
-                }
-              >
-                {calendar.year}
-              </button>
-            </div>
-            <button
-              className="flex items-center justify-center"
-              type="button"
-              onClick={() => moveMonth(1)}
-              aria-label="ماه بعد"
-            >
-              <Icons name="next" />
-            </button>
-          </div>
-          {openPicker === "month" && (
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="jalali-calendar-portal">
             <div
-              className="calendar-pick-menu calendar-month-options"
-              role="listbox"
-              aria-label="انتخاب ماه"
+              ref={calendarRef}
+              className="jalali-calendar"
+              style={{ top: position.top, left: position.left }}
+              role="dialog"
+              aria-label="انتخاب تاریخ شمسی"
             >
-              {jalaliMonths.map((month) => (
+              <div className="calendar-heading">
                 <button
+                  className="flex items-center justify-center"
                   type="button"
-                  role="option"
-                  aria-selected={month === calendar.month}
-                  className={`calendar-pick-option${month === calendar.month ? " selected" : ""}`}
-                  key={month}
-                  onClick={() => {
-                    setViewDate(
-                      jalaliDateInMonth(calendar.year, month, 1) || viewDate,
-                    );
-                    setOpenPicker(null);
-                  }}
+                  onClick={() => moveMonth(-1)}
+                  aria-label="ماه قبل"
                 >
-                  {month}
+                  <Icons name="next" />
                 </button>
-              ))}
-            </div>
-          )}
-          {openPicker === "year" && (
-            <div
-              className="calendar-pick-menu calendar-year-options"
-              role="listbox"
-              aria-label="انتخاب سال"
-            >
-              {Array.from(
-                { length: 81 },
-                (_, index) => calendar.year - index,
-              ).map((year) => (
+                <div className="calendar-heading-selection">
+                  <button
+                    type="button"
+                    className="calendar-selector"
+                    aria-haspopup="listbox"
+                    aria-expanded={openPicker === "month"}
+                    onClick={() =>
+                      setOpenPicker(openPicker === "month" ? null : "month")
+                    }
+                  >
+                    {calendar.month}
+                  </button>
+                  <button
+                    type="button"
+                    className="calendar-selector"
+                    aria-haspopup="listbox"
+                    aria-expanded={openPicker === "year"}
+                    onClick={() =>
+                      setOpenPicker(openPicker === "year" ? null : "year")
+                    }
+                  >
+                    {calendar.year}
+                  </button>
+                </div>
                 <button
+                  className="flex items-center justify-center"
                   type="button"
-                  role="option"
-                  aria-selected={year === calendar.year}
-                  className={`calendar-pick-option${year === calendar.year ? " selected" : ""}`}
-                  key={year}
-                  onClick={() => {
-                    setViewDate(
-                      jalaliDateInMonth(
-                        year,
-                        calendar.month,
-                        calendar.selectedDay,
-                      ) || viewDate,
-                    );
-                    setOpenPicker(null);
-                  }}
+                  onClick={() => moveMonth(1)}
+                  aria-label="ماه بعد"
                 >
-                  {yearFormat.format(year)}
+                  <Icons name="previous" />
                 </button>
-              ))}
-            </div>
-          )}
-          <div className="calendar-grid calendar-weekdays">
-            {["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day) => (
-              <span key={day}>{day}</span>
-            ))}
-          </div>
-          <div className="calendar-grid">
-            {Array.from({ length: calendar.offset }, (_, index) => (
-              <span className="calendar-empty" key={`blank-${index}`} />
-            ))}
-            {calendar.days.map((day) => (
+              </div>
+              {openPicker === "month" && (
+                <div
+                  className="calendar-pick-menu calendar-month-options"
+                  role="listbox"
+                  aria-label="انتخاب ماه"
+                >
+                  {jalaliMonths.map((month) => (
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={month === calendar.month}
+                      className={`calendar-pick-option${month === calendar.month ? " selected" : ""}`}
+                      key={month}
+                      onClick={() => {
+                        setViewDate(
+                          jalaliDateInMonth(calendar.year, month, 1) ||
+                            viewDate,
+                        );
+                        setOpenPicker(null);
+                      }}
+                    >
+                      {month}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {openPicker === "year" && (
+                <div
+                  className="calendar-pick-menu calendar-year-options"
+                  role="listbox"
+                  aria-label="انتخاب سال"
+                >
+                  {Array.from(
+                    { length: 81 },
+                    (_, index) => calendar.year - index,
+                  ).map((year) => (
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={year === calendar.year}
+                      className={`calendar-pick-option${year === calendar.year ? " selected" : ""}`}
+                      key={year}
+                      onClick={() => {
+                        setViewDate(
+                          jalaliDateInMonth(
+                            year,
+                            calendar.month,
+                            calendar.selectedDay,
+                          ) || viewDate,
+                        );
+                        setOpenPicker(null);
+                      }}
+                    >
+                      {yearFormat.format(year)}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="calendar-grid calendar-weekdays">
+                {["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day) => (
+                  <span key={day}>{day}</span>
+                ))}
+              </div>
+              <div className="calendar-grid">
+                {Array.from({ length: calendar.offset }, (_, index) => (
+                  <span className="calendar-empty" key={`blank-${index}`} />
+                ))}
+                {calendar.days.map((day) => (
+                  <button
+                    type="button"
+                    key={day.date}
+                    className={`calendar-day${day.date === value ? " selected" : ""}`}
+                    disabled={day.date > today}
+                    onClick={() => {
+                      onChange(day.date);
+                      setOpenPicker(null);
+                      setOpen(false);
+                    }}
+                  >
+                    {numberFormat.format(day.day)}
+                  </button>
+                ))}
+              </div>
               <button
+                className="calendar-today-button"
                 type="button"
-                key={day.date}
-                className={`calendar-day${day.date === value ? " selected" : ""}`}
-                disabled={day.date > today}
                 onClick={() => {
-                  onChange(day.date);
+                  onChange(today);
+                  setViewDate(today);
                   setOpenPicker(null);
                   setOpen(false);
                 }}
               >
-                {numberFormat.format(day.day)}
+                برو به امروز
               </button>
-            ))}
-          </div>
-          <button
-            className="calendar-today-button"
-            type="button"
-            onClick={() => {
-              onChange(today);
-              setViewDate(today);
-              setOpenPicker(null);
-              setOpen(false);
-            }}
-          >
-            برو به امروز
-          </button>
-        </div>
-        </div>,
-        document.body,
-      )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
