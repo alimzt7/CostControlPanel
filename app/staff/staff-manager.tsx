@@ -23,6 +23,7 @@ type Staff = {
   insured?: boolean;
   monthlyBenefits?: number;
   monthlyDeductions?: number;
+  employerInsuranceMonthly?: number;
 };
 type Payroll = {
   id: string;
@@ -73,11 +74,14 @@ export default function StaffManager() {
   const [role, setRole] = useState("");
   const [salary, setSalary] = useState("");
   const [startDate, setStartDate] = useState("");
-  const [maritalStatus, setMaritalStatus] = useState<"single" | "married">("single");
+  const [maritalStatus, setMaritalStatus] = useState<"single" | "married">(
+    "single",
+  );
   const [childrenCount, setChildrenCount] = useState(0);
   const [insured, setInsured] = useState(false);
   const [monthlyBenefits, setMonthlyBenefits] = useState(0);
   const [monthlyDeductions, setMonthlyDeductions] = useState(0);
+  const [employerInsuranceMonthly, setEmployerInsuranceMonthly] = useState(0);
   const [selectedStaff, setSelectedStaff] = useState("");
   const [payAmount, setPayAmount] = useState("");
   const [payDate, setPayDate] = useState("");
@@ -87,6 +91,7 @@ export default function StaffManager() {
   const [search, setSearch] = useState("");
   const [section, setSection] = useState<"team" | "payroll">("team");
   const [showStaffForm, setShowStaffForm] = useState(false);
+  const [showPayrollForm, setShowPayrollForm] = useState(false);
   const [modalStaffId, setModalStaffId] = useState<string | null>(null);
   const [modalMode, setModalMode] = useState<"details" | "edit">("details");
   const [editDraft, setEditDraft] = useState<Staff | null>(null);
@@ -121,17 +126,37 @@ export default function StaffManager() {
   useEffect(() => {
     const person = staff.find((item) => item.id === selectedStaff);
     if (person) {
-      setPayAmount(String(Math.max(0, person.salary + (person.monthlyBenefits ?? 0) - (person.monthlyDeductions ?? 0))));
-    }
-    else if (!selectedStaff) setPayAmount("");
+      setPayAmount(
+        String(
+          Math.max(
+            0,
+            person.salary +
+              (person.monthlyBenefits ?? 0) -
+              (person.monthlyDeductions ?? 0),
+          ),
+        ),
+      );
+    } else if (!selectedStaff) setPayAmount("");
   }, [selectedStaff, staff]);
 
   const monthKey = jalaliMonthKey(localIsoDate());
   const monthlyPayroll = payroll.filter(
     (item) => jalaliMonthKey(item.date) === monthKey,
   );
+  const monthlyLaborCost = (person: Staff) =>
+    Math.max(
+      0,
+      person.salary +
+        (person.monthlyBenefits ?? 0) +
+        (person.insured ? (person.employerInsuranceMonthly ?? 0) : 0) -
+        (person.monthlyDeductions ?? 0),
+    );
   const estimated = activeStaff.reduce(
-    (sum, person) => sum + Math.max(0, person.salary + (person.monthlyBenefits ?? 0) - (person.monthlyDeductions ?? 0)),
+    (sum, person) => sum + monthlyLaborCost(person),
+    0,
+  );
+  const employerInsuranceTotal = activeStaff.reduce(
+    (sum, person) => sum + (person.insured ? (person.employerInsuranceMonthly ?? 0) : 0),
     0,
   );
   const paid = monthlyPayroll
@@ -151,11 +176,12 @@ export default function StaffManager() {
   const modalStaff = staff.find((person) => person.id === modalStaffId) ?? null;
 
   useEffect(() => {
-    if (!modalStaffId && !showStaffForm) return;
+    if (!modalStaffId && !showStaffForm && !showPayrollForm) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setModalStaffId(null);
         setShowStaffForm(false);
+        setShowPayrollForm(false);
       }
     };
     document.addEventListener("keydown", closeOnEscape);
@@ -164,7 +190,7 @@ export default function StaffManager() {
       document.removeEventListener("keydown", closeOnEscape);
       document.body.style.overflow = "";
     };
-  }, [modalStaffId, showStaffForm]);
+  }, [modalStaffId, showStaffForm, showPayrollForm]);
 
   function addStaff(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -189,6 +215,7 @@ export default function StaffManager() {
       insured,
       monthlyBenefits,
       monthlyDeductions,
+      employerInsuranceMonthly: insured ? employerInsuranceMonthly : 0,
     };
     setStaff((items) => [person, ...items]);
     if (!selectedStaff) setSelectedStaff(person.id);
@@ -200,6 +227,7 @@ export default function StaffManager() {
     setInsured(false);
     setMonthlyBenefits(0);
     setMonthlyDeductions(0);
+    setEmployerInsuranceMonthly(0);
     setShowStaffForm(false);
     setNotice("پرسنل جدید ثبت شد.");
   }
@@ -254,6 +282,7 @@ export default function StaffManager() {
       expenseSynced = false;
     }
     setPayNote("");
+    setShowPayrollForm(false);
     setNotice(
       expenseSynced
         ? payStatus === "paid"
@@ -280,19 +309,37 @@ export default function StaffManager() {
       insured: person.insured ?? false,
       monthlyBenefits: person.monthlyBenefits ?? 0,
       monthlyDeductions: person.monthlyDeductions ?? 0,
+      employerInsuranceMonthly: person.employerInsuranceMonthly ?? 0,
     });
   }
   function saveStaffChanges(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!editDraft?.name.trim() || !editDraft.role.trim() || editDraft.salary <= 0) return;
-    setStaff((items) => items.map((person) => person.id === editDraft.id ? {
-      ...editDraft,
-      name: editDraft.name.trim(),
-      role: editDraft.role.trim(),
-      childrenCount: Math.max(0, Math.floor(editDraft.childrenCount ?? 0)),
-      monthlyBenefits: Math.max(0, editDraft.monthlyBenefits ?? 0),
-      monthlyDeductions: Math.max(0, editDraft.monthlyDeductions ?? 0),
-    } : person));
+    if (
+      !editDraft?.name.trim() ||
+      !editDraft.role.trim() ||
+      editDraft.salary <= 0
+    )
+      return;
+    setStaff((items) =>
+      items.map((person) =>
+        person.id === editDraft.id
+          ? {
+              ...editDraft,
+              name: editDraft.name.trim(),
+              role: editDraft.role.trim(),
+              childrenCount: Math.max(
+                0,
+                Math.floor(editDraft.childrenCount ?? 0),
+              ),
+              monthlyBenefits: Math.max(0, editDraft.monthlyBenefits ?? 0),
+              monthlyDeductions: Math.max(0, editDraft.monthlyDeductions ?? 0),
+              employerInsuranceMonthly: editDraft.insured
+                ? Math.max(0, editDraft.employerInsuranceMonthly ?? 0)
+                : 0,
+            }
+          : person,
+      ),
+    );
     setNotice("اطلاعات پرسنل ویرایش شد.");
     setModalStaffId(null);
   }
@@ -316,7 +363,7 @@ export default function StaffManager() {
           <p className="eyebrow">مدیریت تیم کسب‌وکار</p>
           <h1>پرسنل و حقوق</h1>
           <p className="page-description">
-            اطلاعات پرسنل، حقوق ماهانه و وضعیت پرداخت‌ها را پیگیری کن.
+            تعداد همکاران، اجزای حقوق ماهانه و سوابق پرداخت را مدیریت کن.
           </p>
         </div>
         <button
@@ -324,8 +371,7 @@ export default function StaffManager() {
           type="button"
           onClick={() => {
             if (section === "payroll") {
-              setSection("team");
-              setShowStaffForm(true);
+              if (activeStaff.length) setShowPayrollForm(true);
               return;
             }
             setShowStaffForm((visible) => !visible);
@@ -339,7 +385,7 @@ export default function StaffManager() {
             ? showStaffForm
               ? "بستن فرم"
               : "افزودن پرسنل"
-            : "افزودن پرسنل"}
+            : "ثبت پرداخت حقوق"}
         </button>
       </header>
 
@@ -364,9 +410,9 @@ export default function StaffManager() {
         <article className="staff-stat">
           <Icons name="payroll" className="staff-stat-icon payroll" />
           <div>
-            <small>حقوق برآوردی ماهانه</small>
+            <small>هزینهٔ ماهانهٔ پرسنل</small>
             <strong>{formatMoney(estimated)}</strong>
-            <span>بر اساس حقوق پایه، مزایا و کسورات</span>
+            <span>حقوق پایه + مزایا و پاداش + بیمه − کسورات</span>
           </div>
         </article>
         <article className="staff-stat">
@@ -375,6 +421,14 @@ export default function StaffManager() {
             <small>پرداخت‌شده این ماه</small>
             <strong>{formatMoney(paid)}</strong>
             <span>مانده‌ی برآوردی: {formatMoney(pending)}</span>
+          </div>
+        </article>
+        <article className="staff-stat">
+          <Icons name="payroll" className="staff-stat-icon" />
+          <div>
+            <small>بیمهٔ ماهانهٔ کارفرما</small>
+            <strong>{formatMoney(employerInsuranceTotal)}</strong>
+            <span>مجموع مبلغ ثبت‌شده برای پرسنل فعال</span>
           </div>
         </article>
       </section>
@@ -403,86 +457,175 @@ export default function StaffManager() {
       {section === "team" && (
         <>
           {showStaffForm && (
-            <div className="staff-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowStaffForm(false); }}>
-            <section className="staff-modal staff-add-modal" id="staff-form" role="dialog" aria-modal="true" aria-labelledby="staff-add-title" dir="rtl">
-              <header className="staff-modal-header">
-                <div>
-                  <p className="eyebrow">مدیریت تیم</p>
-                  <h2 id="staff-add-title">افزودن پرسنل</h2>
-                  <span>اطلاعات همکاری و حقوق ماهانه را وارد کن.</span>
-                </div>
-                <button type="button" className="modal-close" aria-label="بستن پنجره" onClick={() => setShowStaffForm(false)}><Icons name="close" /></button>
-              </header>
-              <form className="staff-form" onSubmit={addStaff}>
-                <label className="product-field">
-                  <span>نام و نام خانوادگی</span>
-                  <input
-                    required
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    placeholder="مثلاً سارا احمدی"
-                  />
-                </label>
-                <label className="product-field">
-                  <span>سمت</span>
-                  <input
-                    required
-                    value={role}
-                    onChange={(event) => setRole(event.target.value)}
-                    placeholder="مثلاً سرآشپز"
-                  />
-                </label>
-                <label className="product-field">
-                  <span>حقوق پایه ماهانه (تومان)</span>
-                  <input
-                    required
-                    inputMode="numeric"
-                    value={salary}
-                    onChange={(event) => setSalary(event.target.value)}
-                    placeholder="مثلاً ۱۸,۰۰۰,۰۰۰"
-                  />
-                </label>
-                <label className="product-field">
-                  <span>تاریخ شروع همکاری</span>
-                  <ShamsiDatePicker
-                    value={startDate}
-                    onChange={setStartDate}
-                    placeholder="انتخاب تاریخ شروع شمسی"
-                  />
-                </label>
-                <div className="staff-form-subheading">
-                  <strong>اطلاعات تکمیلی و حقوقی</strong>
-                  <span>برای برآورد بهتر حقوق ماهانه</span>
-                </div>
-                <label className="product-field">
-                  <span>وضعیت تأهل</span>
-                  <select value={maritalStatus} onChange={(event) => setMaritalStatus(event.target.value as "single" | "married")}>
-                    <option value="single">مجرد</option>
-                    <option value="married">متأهل</option>
-                  </select>
-                </label>
-                <label className="product-field">
-                  <span>تعداد فرزند</span>
-                  <input type="number" min="0" step="1" value={childrenCount} onChange={(event) => setChildrenCount(Math.max(0, Math.floor(Number(event.target.value) || 0)))} />
-                </label>
-                <label className="product-field">
-                  <span>مزایای ثابت ماهانه (تومان)</span>
-                  <input type="number" min="0" value={monthlyBenefits} onChange={(event) => setMonthlyBenefits(Math.max(0, Number(event.target.value) || 0))} />
-                </label>
-                <label className="product-field">
-                  <span>کسورات ماهانه (تومان)</span>
-                  <input type="number" min="0" value={monthlyDeductions} onChange={(event) => setMonthlyDeductions(Math.max(0, Number(event.target.value) || 0))} />
-                </label>
-                <label className="staff-insurance-toggle">
-                  <input type="checkbox" checked={insured} onChange={(event) => setInsured(event.target.checked)} />
-                  <span>این پرسنل بیمه است</span>
-                </label>
-                <footer className="staff-modal-footer staff-add-footer">
-                  <button type="button" className="secondary-button" onClick={() => setShowStaffForm(false)}>انصراف</button>
-                  <button className="primary-button staff-submit" type="submit">ثبت پرسنل</button>
-                </footer>
-              </form>
-            </section>
+            <div
+              className="staff-modal-backdrop"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget)
+                  setShowStaffForm(false);
+              }}
+            >
+              <section
+                className="staff-modal staff-add-modal"
+                id="staff-form"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="staff-add-title"
+                dir="rtl"
+              >
+                <header className="staff-modal-header">
+                  <div>
+                    <p className="eyebrow">مدیریت تیم</p>
+                    <h2 id="staff-add-title">افزودن پرسنل</h2>
+                    <span>اطلاعات همکاری و حقوق ماهانه را وارد کن.</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    aria-label="بستن پنجره"
+                    onClick={() => setShowStaffForm(false)}
+                  >
+                    <Icons name="close" />
+                  </button>
+                </header>
+                <form className="staff-form" onSubmit={addStaff}>
+                  <label className="product-field">
+                    <span>نام و نام خانوادگی</span>
+                    <input
+                      required
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      placeholder="مثلاً سارا احمدی"
+                    />
+                  </label>
+                  <label className="product-field">
+                    <span>سمت</span>
+                    <input
+                      required
+                      value={role}
+                      onChange={(event) => setRole(event.target.value)}
+                      placeholder="مثلاً سرآشپز"
+                    />
+                  </label>
+                  <label className="product-field">
+                    <span>حقوق پایه ماهانه (تومان)</span>
+                    <input
+                      required
+                      inputMode="numeric"
+                      value={salary}
+                      onChange={(event) => setSalary(event.target.value)}
+                      placeholder="مثلاً ۱۸,۰۰۰,۰۰۰"
+                    />
+                  </label>
+                  <label className="product-field">
+                    <span>تاریخ شروع همکاری</span>
+                    <ShamsiDatePicker
+                      value={startDate}
+                      onChange={setStartDate}
+                      placeholder="انتخاب تاریخ شروع شمسی"
+                    />
+                  </label>
+                  <div className="staff-form-subheading">
+                    <strong>اطلاعات تکمیلی و حقوقی</strong>
+                    <span>برای برآورد بهتر حقوق ماهانه</span>
+                  </div>
+                  <label className="product-field">
+                    <span>وضعیت تأهل</span>
+                    <select
+                      value={maritalStatus}
+                      onChange={(event) =>
+                        setMaritalStatus(
+                          event.target.value as "single" | "married",
+                        )
+                      }
+                    >
+                      <option value="single">مجرد</option>
+                      <option value="married">متأهل</option>
+                    </select>
+                  </label>
+                  <label className="product-field">
+                    <span>تعداد فرزند</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={childrenCount}
+                      onChange={(event) =>
+                        setChildrenCount(
+                          Math.max(
+                            0,
+                            Math.floor(Number(event.target.value) || 0),
+                          ),
+                        )
+                      }
+                    />
+                  </label>
+                  <label className="product-field">
+                    <span>مزایا و پاداش ماهانه (تومان)</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={monthlyBenefits}
+                      onChange={(event) =>
+                        setMonthlyBenefits(
+                          Math.max(0, Number(event.target.value) || 0),
+                        )
+                      }
+                    />
+                  </label>
+                  <label className="product-field">
+                    <span>کسورات ماهانه (تومان)</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={monthlyDeductions}
+                      onChange={(event) =>
+                        setMonthlyDeductions(
+                          Math.max(0, Number(event.target.value) || 0),
+                        )
+                      }
+                    />
+                  </label>
+                  <label className="staff-insurance-toggle">
+                    <input
+                      type="checkbox"
+                      checked={insured}
+                      onChange={(event) => setInsured(event.target.checked)}
+                    />
+                    <span>این پرسنل بیمه است</span>
+                  </label>
+                  {insured && (
+                    <label className="product-field">
+                      <span>هزینهٔ ماهانهٔ بیمهٔ کارفرما (تومان)</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={employerInsuranceMonthly || ""}
+                        onChange={(event) =>
+                          setEmployerInsuranceMonthly(
+                            Math.max(0, Number(event.target.value) || 0),
+                          )
+                        }
+                        placeholder="در صورت اطلاع وارد کن"
+                      />
+                    </label>
+                  )}
+                  <footer className="staff-modal-footer staff-add-footer">
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setShowStaffForm(false)}
+                    >
+                      انصراف
+                    </button>
+                    <button
+                      className="primary-button staff-submit"
+                      type="submit"
+                    >
+                      ثبت پرسنل
+                    </button>
+                  </footer>
+                </form>
+              </section>
             </div>
           )}
 
@@ -502,7 +645,7 @@ export default function StaffManager() {
               </label>
             </div>
             {filteredStaff.length ? (
-            <div className="table-wrap staff-table-wrap">
+              <div className="table-wrap staff-table-wrap">
                 <table className="products-table staff-table">
                   <thead>
                     <tr>
@@ -532,10 +675,22 @@ export default function StaffManager() {
                           </span>
                         </td>
                         <td>
-                          <button className="staff-row-action" type="button" onClick={() => openStaffDetails(person, "details")}>مشاهده اطلاعات</button>
+                          <button
+                            className="staff-row-action"
+                            type="button"
+                            onClick={() => openStaffDetails(person, "details")}
+                          >
+                            مشاهده اطلاعات
+                          </button>
                         </td>
                         <td>
-                          <button className="edit-material staff-edit-action" type="button" onClick={() => openStaffDetails(person, "edit")}>ویرایش</button>
+                          <button
+                            className="edit-material staff-edit-action"
+                            type="button"
+                            onClick={() => openStaffDetails(person, "edit")}
+                          >
+                            ویرایش
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -577,64 +732,19 @@ export default function StaffManager() {
               <span className="panel-step">۲</span>
             </div>
             {activeStaff.length ? (
-              <form className="payroll-form" onSubmit={addPayroll}>
-                <label className="product-field">
-                  <span>پرسنل</span>
-                  <select
-                    required
-                    value={selectedStaff}
-                    onChange={(event) => setSelectedStaff(event.target.value)}
-                  >
-                    <option value="">انتخاب پرسنل</option>
-                    {activeStaff.map((person) => (
-                      <option key={person.id} value={person.id}>
-                        {person.name} — {person.role}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="product-field">
-                  <span>مبلغ پرداخت (تومان)</span>
-                  <input
-                    required
-                    inputMode="numeric"
-                    value={payAmount}
-                    onChange={(event) => setPayAmount(event.target.value)}
-                    placeholder="مبلغ پرداختی"
-                  />
-                </label>
-                <label className="product-field">
-                  <span>تاریخ پرداخت / ثبت</span>
-                  <ShamsiDatePicker
-                    value={payDate}
-                    onChange={setPayDate}
-                    placeholder="انتخاب تاریخ پرداخت شمسی"
-                  />
-                </label>
-                <label className="product-field">
-                  <span>وضعیت</span>
-                  <select
-                    value={payStatus}
-                    onChange={(event) =>
-                      setPayStatus(event.target.value as "paid" | "pending")
-                    }
-                  >
-                    <option value="paid">پرداخت شده</option>
-                    <option value="pending">در انتظار پرداخت</option>
-                  </select>
-                </label>
-                <label className="product-field pay-note">
-                  <span>یادداشت</span>
-                  <input
-                    value={payNote}
-                    onChange={(event) => setPayNote(event.target.value)}
-                    placeholder="مثلاً حقوق آبان"
-                  />
-                </label>
-                <button className="primary-button payroll-submit" type="submit">
-                  ثبت پرداخت
+              <div className="staff-inline-empty">
+                <strong>پرداخت‌های ماهانه را جداگانه ثبت و پیگیری کن</strong>
+                <span>
+                  پرداخت‌ها در سوابق پرسنل و فهرست هزینه‌ها ثبت می‌شوند.
+                </span>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => setShowPayrollForm(true)}
+                >
+                  <Icons name="add" className="inline-icon" /> ثبت پرداخت حقوق
                 </button>
-              </form>
+              </div>
             ) : (
               <div className="staff-inline-empty">
                 <strong>برای ثبت حقوق، اول باید پرسنل داشته باشی</strong>
@@ -654,6 +764,109 @@ export default function StaffManager() {
               </div>
             )}
           </section>
+          {showPayrollForm && activeStaff.length > 0 && (
+            <div
+              className="staff-modal-backdrop"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget)
+                  setShowPayrollForm(false);
+              }}
+            >
+              <section
+                className="staff-modal staff-add-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="payroll-add-title"
+                dir="rtl"
+              >
+                <header className="staff-modal-header">
+                  <div>
+                    <p className="eyebrow">ثبت پرداخت</p>
+                    <h2 id="payroll-add-title">ثبت پرداخت حقوق</h2>
+                    <span>مبلغ و تاریخ پرداخت را وارد کن.</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    aria-label="بستن پنجره"
+                    onClick={() => setShowPayrollForm(false)}
+                  >
+                    <Icons name="close" />
+                  </button>
+                </header>
+                <form className="payroll-form" onSubmit={addPayroll}>
+                  <label className="product-field">
+                    <span>پرسنل</span>
+                    <select
+                      required
+                      value={selectedStaff}
+                      onChange={(event) => setSelectedStaff(event.target.value)}
+                    >
+                      <option value="">انتخاب پرسنل</option>
+                      {activeStaff.map((person) => (
+                        <option key={person.id} value={person.id}>
+                          {person.name} — {person.role}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="product-field">
+                    <span>مبلغ پرداخت (تومان)</span>
+                    <input
+                      required
+                      inputMode="numeric"
+                      value={payAmount}
+                      onChange={(event) => setPayAmount(event.target.value)}
+                      placeholder="مبلغ پرداختی"
+                    />
+                  </label>
+                  <label className="product-field">
+                    <span>تاریخ پرداخت / ثبت</span>
+                    <ShamsiDatePicker
+                      value={payDate}
+                      onChange={setPayDate}
+                      placeholder="انتخاب تاریخ پرداخت شمسی"
+                    />
+                  </label>
+                  <label className="product-field">
+                    <span>وضعیت</span>
+                    <select
+                      value={payStatus}
+                      onChange={(event) =>
+                        setPayStatus(event.target.value as "paid" | "pending")
+                      }
+                    >
+                      <option value="paid">پرداخت شده</option>
+                      <option value="pending">در انتظار پرداخت</option>
+                    </select>
+                  </label>
+                  <label className="product-field pay-note">
+                    <span>یادداشت</span>
+                    <input
+                      value={payNote}
+                      onChange={(event) => setPayNote(event.target.value)}
+                      placeholder="مثلاً حقوق ماه جاری"
+                    />
+                  </label>
+                  <footer className="staff-modal-footer staff-add-footer">
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setShowPayrollForm(false)}
+                    >
+                      انصراف
+                    </button>
+                    <button
+                      className="primary-button staff-submit"
+                      type="submit"
+                    >
+                      ثبت پرداخت
+                    </button>
+                  </footer>
+                </form>
+              </section>
+            </div>
+          )}
           <section className="panel payroll-list-panel">
             <div className="panel-heading product-panel-heading">
               <div>
@@ -717,57 +930,271 @@ export default function StaffManager() {
         </>
       )}
       {modalStaff && editDraft && (
-        <div className="staff-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setModalStaffId(null); }}>
-          <section className="staff-modal" role="dialog" aria-modal="true" aria-labelledby="staff-modal-title" dir="rtl">
+        <div
+          className="staff-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setModalStaffId(null);
+          }}
+        >
+          <section
+            className="staff-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="staff-modal-title"
+            dir="rtl"
+          >
             <header className="staff-modal-header">
               <div>
                 <p className="eyebrow">پرونده پرسنل</p>
                 <h2 id="staff-modal-title">{modalStaff.name}</h2>
                 <span>{modalStaff.role}</span>
               </div>
-              <button type="button" className="modal-close" aria-label="بستن پنجره" onClick={() => setModalStaffId(null)}><Icons name="close" /></button>
+              <button
+                type="button"
+                className="modal-close"
+                aria-label="بستن پنجره"
+                onClick={() => setModalStaffId(null)}
+              >
+                <Icons name="close" />
+              </button>
             </header>
             {modalMode === "details" ? (
               <>
                 <div className="staff-detail-grid">
-                  <div><span>وضعیت تأهل</span><strong>{(modalStaff.maritalStatus ?? "single") === "married" ? "متأهل" : "مجرد"}</strong></div>
-                  <div><span>تعداد فرزند</span><strong>{numberFormat.format(modalStaff.childrenCount ?? 0)} نفر</strong></div>
-                  <div><span>بیمه</span><strong>{modalStaff.insured ? "دارای بیمه" : "بدون بیمه"}</strong></div>
-                  <div><span>حقوق پایه ماهانه</span><strong>{formatMoney(modalStaff.salary)}</strong></div>
-                  <div><span>مزایای ثابت ماهانه</span><strong>{formatMoney(modalStaff.monthlyBenefits ?? 0)}</strong></div>
-                  <div><span>کسورات ماهانه</span><strong>{formatMoney(modalStaff.monthlyDeductions ?? 0)}</strong></div>
-                  <div className="staff-detail-total"><span>مبنای برآورد ماهانه</span><strong>{formatMoney(Math.max(0, modalStaff.salary + (modalStaff.monthlyBenefits ?? 0) - (modalStaff.monthlyDeductions ?? 0)))}</strong></div>
+                  <div>
+                    <span>وضعیت تأهل</span>
+                    <strong>
+                      {(modalStaff.maritalStatus ?? "single") === "married"
+                        ? "متأهل"
+                        : "مجرد"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>تعداد فرزند</span>
+                    <strong>
+                      {numberFormat.format(modalStaff.childrenCount ?? 0)} نفر
+                    </strong>
+                  </div>
+                  <div>
+                    <span>بیمه</span>
+                    <strong>
+                      {modalStaff.insured ? "دارای بیمه" : "بدون بیمه"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>حقوق پایه ماهانه</span>
+                    <strong>{formatMoney(modalStaff.salary)}</strong>
+                  </div>
+                  <div>
+                    <span>مزایا و پاداش ماهانه</span>
+                    <strong>
+                      {formatMoney(modalStaff.monthlyBenefits ?? 0)}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>کسورات ماهانه</span>
+                    <strong>
+                      {formatMoney(modalStaff.monthlyDeductions ?? 0)}
+                    </strong>
+                  </div>
+                  {modalStaff.insured && (
+                    <div>
+                      <span>بیمهٔ ماهانهٔ کارفرما</span>
+                      <strong>
+                        {formatMoney(modalStaff.employerInsuranceMonthly ?? 0)}
+                      </strong>
+                    </div>
+                  )}
+                  <div className="staff-detail-total">
+                    <span>مبنای برآورد ماهانه</span>
+                    <strong>{formatMoney(monthlyLaborCost(modalStaff))}</strong>
+                  </div>
                 </div>
                 <footer className="staff-modal-footer">
-                  <button type="button" className="secondary-button" onClick={() => setModalStaffId(null)}>بستن</button>
-                  <button type="button" className="primary-button" onClick={() => setModalMode("edit")}>ویرایش اطلاعات</button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setModalStaffId(null)}
+                  >
+                    بستن
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={() => setModalMode("edit")}
+                  >
+                    ویرایش اطلاعات
+                  </button>
                 </footer>
               </>
             ) : (
               <form className="staff-edit-form" onSubmit={saveStaffChanges}>
-                <label className="product-field"><span>نام و نام خانوادگی</span><input required value={editDraft.name} onChange={(event) => setEditDraft({ ...editDraft, name: event.target.value })} /></label>
-                <label className="product-field"><span>سمت</span><input required value={editDraft.role} onChange={(event) => setEditDraft({ ...editDraft, role: event.target.value })} /></label>
-                <label className="product-field"><span>حقوق پایه ماهانه (تومان)</span><input required min="1" type="number" value={editDraft.salary} onChange={(event) => setEditDraft({ ...editDraft, salary: Number(event.target.value) })} /></label>
-                <label className="product-field"><span>تاریخ شروع همکاری</span><ShamsiDatePicker value={editDraft.startDate} onChange={(value) => setEditDraft({ ...editDraft, startDate: value })} placeholder="انتخاب تاریخ شمسی" /></label>
-                <label className="product-field"><span>وضعیت تأهل</span><select value={editDraft.maritalStatus ?? "single"} onChange={(event) => setEditDraft({ ...editDraft, maritalStatus: event.target.value as "single" | "married" })}><option value="single">مجرد</option><option value="married">متأهل</option></select></label>
-                <label className="product-field"><span>تعداد فرزند</span><input min="0" type="number" value={editDraft.childrenCount ?? 0} onChange={(event) => setEditDraft({ ...editDraft, childrenCount: Number(event.target.value) })} /></label>
-                <label className="product-field"><span>مزایای ثابت ماهانه (تومان)</span><input min="0" type="number" value={editDraft.monthlyBenefits ?? 0} onChange={(event) => setEditDraft({ ...editDraft, monthlyBenefits: Number(event.target.value) })} /></label>
-                <label className="product-field"><span>کسورات ماهانه (تومان)</span><input min="0" type="number" value={editDraft.monthlyDeductions ?? 0} onChange={(event) => setEditDraft({ ...editDraft, monthlyDeductions: Number(event.target.value) })} /></label>
-                <label className="staff-insurance-toggle"><input type="checkbox" checked={editDraft.insured ?? false} onChange={(event) => setEditDraft({ ...editDraft, insured: event.target.checked })} /><span>این پرسنل بیمه است</span></label>
-                <label className="staff-insurance-toggle"><input type="checkbox" checked={editDraft.active} onChange={(event) => setEditDraft({ ...editDraft, active: event.target.checked })} /><span>پرسنل فعال است</span></label>
+                <label className="product-field">
+                  <span>نام و نام خانوادگی</span>
+                  <input
+                    required
+                    value={editDraft.name}
+                    onChange={(event) =>
+                      setEditDraft({ ...editDraft, name: event.target.value })
+                    }
+                  />
+                </label>
+                <label className="product-field">
+                  <span>سمت</span>
+                  <input
+                    required
+                    value={editDraft.role}
+                    onChange={(event) =>
+                      setEditDraft({ ...editDraft, role: event.target.value })
+                    }
+                  />
+                </label>
+                <label className="product-field">
+                  <span>حقوق پایه ماهانه (تومان)</span>
+                  <input
+                    required
+                    min="1"
+                    type="number"
+                    value={editDraft.salary}
+                    onChange={(event) =>
+                      setEditDraft({
+                        ...editDraft,
+                        salary: Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+                <label className="product-field">
+                  <span>تاریخ شروع همکاری</span>
+                  <ShamsiDatePicker
+                    value={editDraft.startDate}
+                    onChange={(value) =>
+                      setEditDraft({ ...editDraft, startDate: value })
+                    }
+                    placeholder="انتخاب تاریخ شمسی"
+                  />
+                </label>
+                <label className="product-field">
+                  <span>وضعیت تأهل</span>
+                  <select
+                    value={editDraft.maritalStatus ?? "single"}
+                    onChange={(event) =>
+                      setEditDraft({
+                        ...editDraft,
+                        maritalStatus: event.target.value as
+                          | "single"
+                          | "married",
+                      })
+                    }
+                  >
+                    <option value="single">مجرد</option>
+                    <option value="married">متأهل</option>
+                  </select>
+                </label>
+                <label className="product-field">
+                  <span>تعداد فرزند</span>
+                  <input
+                    min="0"
+                    type="number"
+                    value={editDraft.childrenCount ?? 0}
+                    onChange={(event) =>
+                      setEditDraft({
+                        ...editDraft,
+                        childrenCount: Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+                <label className="product-field">
+                  <span>مزایا و پاداش ماهانه (تومان)</span>
+                  <input
+                    min="0"
+                    type="number"
+                    value={editDraft.monthlyBenefits ?? 0}
+                    onChange={(event) =>
+                      setEditDraft({
+                        ...editDraft,
+                        monthlyBenefits: Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+                <label className="product-field">
+                  <span>کسورات ماهانه (تومان)</span>
+                  <input
+                    min="0"
+                    type="number"
+                    value={editDraft.monthlyDeductions ?? 0}
+                    onChange={(event) =>
+                      setEditDraft({
+                        ...editDraft,
+                        monthlyDeductions: Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+                <label className="staff-insurance-toggle">
+                  <input
+                    type="checkbox"
+                    checked={editDraft.insured ?? false}
+                    onChange={(event) =>
+                      setEditDraft({
+                        ...editDraft,
+                        insured: event.target.checked,
+                      })
+                    }
+                  />
+                  <span>این پرسنل بیمه است</span>
+                </label>
+                {editDraft.insured && (
+                  <label className="product-field">
+                    <span>هزینهٔ ماهانهٔ بیمهٔ کارفرما (تومان)</span>
+                    <input
+                      min="0"
+                      type="number"
+                      value={editDraft.employerInsuranceMonthly || ""}
+                      onChange={(event) =>
+                        setEditDraft({
+                          ...editDraft,
+                          employerInsuranceMonthly: Math.max(
+                            0,
+                            Number(event.target.value) || 0,
+                          ),
+                        })
+                      }
+                    />
+                  </label>
+                )}
+                <label className="staff-insurance-toggle">
+                  <input
+                    type="checkbox"
+                    checked={editDraft.active}
+                    onChange={(event) =>
+                      setEditDraft({
+                        ...editDraft,
+                        active: event.target.checked,
+                      })
+                    }
+                  />
+                  <span>پرسنل فعال است</span>
+                </label>
                 <footer className="staff-modal-footer staff-edit-footer">
-                  <button type="button" className="secondary-button" onClick={() => setModalMode("details")}>انصراف</button>
-                  <button type="submit" className="primary-button">ذخیره تغییرات</button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setModalMode("details")}
+                  >
+                    انصراف
+                  </button>
+                  <button type="submit" className="primary-button">
+                    ذخیره تغییرات
+                  </button>
                 </footer>
               </form>
             )}
           </section>
         </div>
       )}
-      <p className="local-storage-note">
-        اطلاعات این نسخه روی همین مرورگر ذخیره می‌شود. سوابق پرداخت با تغییر
-        وضعیت اشتغال پرسنل حذف نمی‌شوند.
-      </p>
       <DashboardShortcut />
     </main>
   );

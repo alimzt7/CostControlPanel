@@ -193,7 +193,9 @@ export default function ExpenseManager() {
     setRecurring(false);
     setEditingId(null);
     setFormOpen(false);
-    setNotice(editingId ? "تغییرات هزینه ذخیره شد." : "هزینه با موفقیت ثبت شد.");
+    setNotice(
+      editingId ? "تغییرات هزینه ذخیره شد." : "هزینه با موفقیت ثبت شد.",
+    );
   }
 
   function changeGroup(value: ExpenseGroup) {
@@ -238,7 +240,11 @@ export default function ExpenseManager() {
             هزینه‌های ثابت، جاری، سربار و حقوق پرسنل را یک‌جا ثبت و پیگیری کن.
           </p>
         </div>
-        <button className="primary-button" type="button" onClick={openNewExpense}>
+        <button
+          className="primary-button"
+          type="button"
+          onClick={openNewExpense}
+        >
           <Icons name="add" className="inline-icon" /> ثبت هزینه
         </button>
       </header>
@@ -320,76 +326,76 @@ export default function ExpenseManager() {
               </div>
             </div>
             <form className="expense-form" onSubmit={submitExpense}>
-          <label className="product-field">
-            <span>عنوان هزینه</span>
-            <input
-              required
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="مثلاً اجاره آبان"
-            />
-          </label>
-          <label className="product-field">
-            <span>مبلغ (تومان)</span>
-            <input
-              required
-              inputMode="numeric"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              placeholder="مثلاً ۲۵,۰۰۰,۰۰۰"
-            />
-          </label>
-          <label className="product-field">
-            <span>نوع هزینه</span>
-            <select
-              value={group}
-              onChange={(event) =>
-                changeGroup(event.target.value as ExpenseGroup)
-              }
-            >
-              {groups.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-          <label className="product-field">
-            <span>دسته‌بندی</span>
-            <select
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
-            >
-              {categories[group].map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-          <label className="product-field">
-            <span>تاریخ ثبت</span>
-            <ShamsiDatePicker value={date} onChange={setDate} />
-          </label>
-          <label className="product-field expense-note-field">
-            <span>توضیحات (اختیاری)</span>
-            <input
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="یادداشت کوتاه درباره این هزینه"
-            />
-          </label>
-          <label className="recurring-check">
-            <input
-              type="checkbox"
-              checked={recurring}
-              onChange={(event) => setRecurring(event.target.checked)}
-            />
-            <span>
-              <strong>هزینه تکرارشونده</strong>
-              <small>مثل اجاره یا حقوق ماهانه</small>
-            </span>
-          </label>
-          <button className="primary-button expense-submit" type="submit">
-            {editingId ? "ذخیره تغییرات" : "ثبت هزینه"}
-          </button>
-        </form>
+              <label className="product-field">
+                <span>عنوان هزینه</span>
+                <input
+                  required
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="مثلاً اجاره آبان"
+                />
+              </label>
+              <label className="product-field">
+                <span>مبلغ (تومان)</span>
+                <input
+                  required
+                  inputMode="numeric"
+                  value={amount}
+                  onChange={(event) => setAmount(event.target.value)}
+                  placeholder="مثلاً ۲۵,۰۰۰,۰۰۰"
+                />
+              </label>
+              <label className="product-field">
+                <span>نوع هزینه</span>
+                <select
+                  value={group}
+                  onChange={(event) =>
+                    changeGroup(event.target.value as ExpenseGroup)
+                  }
+                >
+                  {groups.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="product-field">
+                <span>دسته‌بندی</span>
+                <select
+                  value={category}
+                  onChange={(event) => setCategory(event.target.value)}
+                >
+                  {categories[group].map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="product-field">
+                <span>تاریخ ثبت</span>
+                <ShamsiDatePicker value={date} onChange={setDate} />
+              </label>
+              <label className="product-field expense-note-field">
+                <span>توضیحات (اختیاری)</span>
+                <input
+                  value={note}
+                  onChange={(event) => setNote(event.target.value)}
+                  placeholder="یادداشت کوتاه درباره این هزینه"
+                />
+              </label>
+              <label className="recurring-check">
+                <input
+                  type="checkbox"
+                  checked={recurring}
+                  onChange={(event) => setRecurring(event.target.checked)}
+                />
+                <span>
+                  <strong>هزینه تکرارشونده</strong>
+                  <small>مثل اجاره یا حقوق ماهانه</small>
+                </span>
+              </label>
+              <button className="primary-button expense-submit" type="submit">
+                {editingId ? "ذخیره تغییرات" : "ثبت هزینه"}
+              </button>
+            </form>
           </section>
         </div>
       )}
@@ -499,7 +505,11 @@ export default function ExpenseManager() {
                 : "اولین هزینه‌ی کسب‌وکارت را ثبت کن تا جمع هزینه‌های ماهانه نمایش داده شود."}
             </p>
             {!expenses.length && (
-              <button className="primary-button" type="button" onClick={openNewExpense}>
+              <button
+                className="primary-button"
+                type="button"
+                onClick={openNewExpense}
+              >
                 <Icons name="add" className="inline-icon" /> ثبت اولین هزینه
               </button>
             )}
@@ -525,14 +535,20 @@ export default function ExpenseManager() {
               بازگشت نیست.
             </p>
             <div className="confirm-delete-actions">
-              <button className="secondary-button" type="button" onClick={() => setDeleteTarget(null)}>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+              >
                 انصراف
               </button>
               <button
                 className="danger-button"
                 type="button"
                 onClick={() => {
-                  setExpenses((current) => current.filter((item) => item.id !== deleteTarget.id));
+                  setExpenses((current) =>
+                    current.filter((item) => item.id !== deleteTarget.id),
+                  );
                   setDeleteTarget(null);
                   setNotice("هزینه حذف شد.");
                 }}
@@ -543,9 +559,6 @@ export default function ExpenseManager() {
           </section>
         </div>
       )}
-      <p className="local-storage-note">
-        اطلاعات این نسخه روی همین مرورگر ذخیره می‌شود.
-      </p>
       <DashboardShortcut />
     </main>
   );

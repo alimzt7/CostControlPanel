@@ -2532,7 +2532,7 @@ a:focus-visible {
 }
 .staff-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 13px;
   margin-bottom: 15px;
 }
@@ -2773,8 +2773,12 @@ a:focus-visible {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   padding-top: 18px;
 }
+.staff-modal .payroll-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .staff-modal .staff-form-subheading,
-.staff-modal .staff-add-footer {
+.staff-modal .staff-add-footer,
+.staff-modal .pay-note {
   grid-column: 1 / -1;
 }
 .staff-add-footer {
@@ -2868,6 +2872,9 @@ a:focus-visible {
   .payroll-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .staff-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .pay-note {
     grid-column: auto;
   }
@@ -2904,7 +2911,8 @@ a:focus-visible {
     border-radius: 14px;
   }
   .staff-modal .staff-form-subheading,
-  .staff-modal .staff-add-footer {
+  .staff-modal .staff-add-footer,
+  .staff-modal .pay-note {
     grid-column: auto;
   }
   .staff-add-footer > button {
